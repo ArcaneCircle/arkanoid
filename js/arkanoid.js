@@ -70,18 +70,18 @@ function ArkanoidGame(canvas, context) {
 	var BRICK_SCORE = 100;
 
 	this.level = 0;
-	this.lifes = 3;
+	this.lifes = 1;
 	this.score = 0;
 	this.paddle = new Paddle(canvas.width / 2 - PADDLE_WIDTH / 2, canvas.height - 20, PADDLE_WIDTH, PADDLE_HEIGHT);
 	this.ball = new Ball(canvas.width / 2, canvas.height / 2, BALL_RADIUS, BallDirs.NONE, BALL_DEFAULT_SPEED);
 	this.gameOver = false;
 	this.gameWin = false;
 	this.gamePaused = false;
-	this.bricks = new Bricks(8, 2, BRICK_WIDTH, BRICK_HEIGHT);
+	this.bricks = new Bricks(5, 2, BRICK_WIDTH, BRICK_HEIGHT);
 
 	this.init = function() {
 		this.level = 0;
-		this.lifes = 3;
+		this.lifes = 1;
 		this.score = 0;
 		this.gameOver = false;
 		this.gameWin = false;
@@ -93,7 +93,7 @@ function ArkanoidGame(canvas, context) {
 	this.initLevel = function(level) {
 		switch (level) {
 			case 0:
-				this.bricks = new Bricks(8, 2, BRICK_WIDTH, BRICK_HEIGHT);
+				this.bricks = new Bricks(5, 2, Math.round(window.screen.width/5)-2, BRICK_HEIGHT);
 				for (var i = 0; i < this.bricks.bricks.length; i++) {
 					for (var j = 0; j < this.bricks.bricks[i].length; j++) {
 						this.bricks.bricks[i][j].lifes = BricksTypes.DEFAULT;
@@ -102,7 +102,7 @@ function ArkanoidGame(canvas, context) {
 				break;
 
 			case 1:
-				this.bricks = new Bricks(8, 2, BRICK_WIDTH, BRICK_HEIGHT);
+				this.bricks = new Bricks(5, 2, Math.round(window.screen.width/5)-2, BRICK_HEIGHT);
 				for (var i = 0; i < this.bricks.bricks.length; i++) {
 					for (var j = 0; j < this.bricks.bricks[i].length; j++) {
 						this.bricks.bricks[i][j].lifes = BricksTypes.DEFAULT + i;
@@ -111,7 +111,7 @@ function ArkanoidGame(canvas, context) {
 				break;
 
 			case 2:
-				this.bricks = new Bricks(8, 4, BRICK_WIDTH, BRICK_HEIGHT);
+				this.bricks = new Bricks(5, 4, Math.round(window.screen.width/5)-2, BRICK_HEIGHT);
 				for (var i = 0; i < this.bricks.bricks.length; i++) {
 					for (var j = 0; j < this.bricks.bricks[i].length; j++) {
 						this.bricks.bricks[i][j].lifes = BricksTypes.DEFAULT + i;
@@ -120,7 +120,7 @@ function ArkanoidGame(canvas, context) {
 				break;
 
 			case 3:
-				this.bricks = new Bricks(8, 5, BRICK_WIDTH, BRICK_HEIGHT);
+				this.bricks = new Bricks(5, 5, Math.round(window.screen.width/5)-2, BRICK_HEIGHT);
 				for (var i = 0; i < this.bricks.bricks.length; i++) {
 					for (var j = 0; j < this.bricks.bricks[i].length; j++) {
 						this.bricks.bricks[i][j].lifes = BricksTypes.DEFAULT + i;
@@ -180,7 +180,8 @@ function ArkanoidGame(canvas, context) {
 		if (this.gameOver) {
 			context.fillStyle = 'rgb(255,255,0)';
 			context.font = 'bold 20px Arial';
-			context.fillText('Game Over', canvas.width / 2 - 40, canvas.height / 2);
+                        sendMsg(this.score)
+			context.fillText('Scores:\n'+window.webxdc.selfName+' '+this.score, canvas.width / 2 - 40, canvas.height / 2);
 		}
 
 		if (this.gameWin) {
@@ -400,8 +401,10 @@ function render() {
 
 function checkCanvasIsSupported() {
 	canvas = document.getElementById("gameCanvas");
-	canvas.width = 640;
-	canvas.height = 480;
+	canvas.width =  window.innerWidth || document.documentElement.clientWidth ||
+document.body.clientWidth;
+	canvas.height = window.innerHeight|| document.documentElement.clientHeight||
+document.body.clientHeight;
 	canvas.style.cursor = "none";
 	if (canvas.getContext) {
 		context = canvas.getContext('2d');
@@ -442,3 +445,12 @@ document.onmousemove = function(event) {
 document.onclick = function(){
 	arkanoidGame.startGame();
 }
+function sendMsg(msg) {
+             window.webxdc.sendUpdate({payload: {name: window.webxdc.selfName, msg: msg}}, window.webxdc.selfName+' score "'+msg+'"');
+         }
+
+function receiveUpdate(update) {
+             document.getElementById('output').innerHTML += "<strong>&lt;" + update.payload.name + "&gt;</strong> " + update.payload.msg + "<br>";
+         }
+
+         window.webxdc.setUpdateListener(receiveUpdate, 0);
