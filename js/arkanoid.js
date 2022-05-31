@@ -178,13 +178,31 @@ function ArkanoidGame(canvas, context) {
 		}
 
 		if (this.gameOver) {
+                        ordarr = [];
 			context.fillStyle = 'rgb(255,255,0)';
 			context.font = 'bold 20px Arial';
                         sendMsg(this.score);
                         lines = document.getElementById('scoreboard').innerHTML.split('<br>');
                         context.fillText('Scores', canvas.width / 2 - 40, (canvas.height / 2)-20);
+                        max_value = 0;
                         for (x=0; x<lines.length; x++) {
-			    context.fillText(lines[x], canvas.width / 2 - 40, (canvas.height / 2)+x*20);
+                            line = lines[x].split(' ');
+                            if (line[0]>=max_value) {
+                               max_value=line[0]
+                               ordarr.splice(0, 0, lines[x]);
+                            }
+                            else {
+                               ordarr.splice(x, 0, lines[x]);
+                            }
+                        }
+                        for (i=0; i<ordarr.length; i++) {
+                            line_score = ordarr[i].split(" ");
+                            invert_score="";
+                            for (n=line_score.length-1; n>=0; n--) {
+                                invert_score+=line_score[n]+" "
+                            }
+                            if (i+1<ordarr.length)
+                               context.fillText(i+1+" - "+invert_score, canvas.width / 2 - 40, (canvas.height / 2)+i*20);
                         }
                         return false;
 		}
@@ -463,8 +481,8 @@ function sendMsg(msg) {
          }
 
 function receiveUpdate(update) {
-             if (document.getElementById('scoreboard').innerText.indexOf(update.payload.name + " " + update.payload.msg)==-1) {
-                document.getElementById('scoreboard').innerHTML += "<br>" + update.payload.name + " " + update.payload.msg ;
+             if (document.getElementById('scoreboard').innerText.indexOf(update.payload.msg + " " + update.payload.name)==-1) {
+                document.getElementById('scoreboard').innerHTML += "<br>" + update.payload.msg + " " + update.payload.name;
              }
          }
 window.webxdc.setUpdateListener(receiveUpdate, 0);
