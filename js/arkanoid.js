@@ -180,8 +180,13 @@ function ArkanoidGame(canvas, context) {
 		if (this.gameOver) {
 			context.fillStyle = 'rgb(255,255,0)';
 			context.font = 'bold 20px Arial';
-                        sendMsg(this.score)
-			context.fillText('Scores:\n'+window.webxdc.selfName+' '+this.score, canvas.width / 2 - 40, canvas.height / 2);
+                        sendMsg(this.score);
+                        lines = document.getElementById('scoreboard').innerHTML.split('<br>');
+                        context.fillText('Scores', canvas.width / 2 - 40, (canvas.height / 2)-20);
+                        for (x=0; x<lines.length; x++) {
+			    context.fillText(lines[x], canvas.width / 2 - 40, (canvas.height / 2)+x*20);
+                        }
+                        return false;
 		}
 
 		if (this.gameWin) {
@@ -401,10 +406,10 @@ function render() {
 
 function checkCanvasIsSupported() {
 	canvas = document.getElementById("gameCanvas");
-	canvas.width =  window.innerWidth || document.documentElement.clientWidth ||
-document.body.clientWidth;
-	canvas.height = window.innerHeight|| document.documentElement.clientHeight||
-document.body.clientHeight;
+	canvas.width =  (window.innerWidth || document.documentElement.clientWidth ||
+document.body.clientWidth)-15;
+	canvas.height = (window.innerHeight|| document.documentElement.clientHeight||
+document.body.clientHeight)-50;
 	canvas.style.cursor = "none";
 	if (canvas.getContext) {
 		context = canvas.getContext('2d');
@@ -439,18 +444,27 @@ document.onkeydown = function(event) {
 }
 
 document.onmousemove = function(event) {
+        event.preventDefault()
 	arkanoidGame.setPaddlePos(event.pageX);
+}
+
+document.ontouchmove = function(event) {
+	arkanoidGame.setPaddlePos(event.touches[0].clientX);
 }
 
 document.onclick = function(){
 	arkanoidGame.startGame();
+        if (arkanoidGame.gameOver) {
+           document.location.reload(true);
+        }
 }
 function sendMsg(msg) {
              window.webxdc.sendUpdate({payload: {name: window.webxdc.selfName, msg: msg}}, window.webxdc.selfName+' score "'+msg+'"');
          }
 
 function receiveUpdate(update) {
-             document.getElementById('output').innerHTML += "<strong>&lt;" + update.payload.name + "&gt;</strong> " + update.payload.msg + "<br>";
+             if (document.getElementById('scoreboard').innerText.indexOf(update.payload.name + " " + update.payload.msg)==-1) {
+                document.getElementById('scoreboard').innerHTML += "<br>" + update.payload.name + " " + update.payload.msg ;
+             }
          }
-
-         window.webxdc.setUpdateListener(receiveUpdate, 0);
+window.webxdc.setUpdateListener(receiveUpdate, 0);

@@ -1,8 +1,10 @@
+<!DOCTYPE html>
 <html>
 <head>
 <title>Arkanoid Game</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="webxdc.js"></script>
 </head>
 <!--
 ======================================================================
@@ -10,9 +12,9 @@ JavaScript Arkanoid Game
 Author: delimitry
 ======================================================================
 -->
-<body onload="checkCanvasIsSupported();" style="background: #000">
-<script type="text/javascript" src="js/arkanoid.js"></script>
-<script src="webxdc.js"></script>
+<body onload="checkCanvasIsSupported();" style="background: #000000">
 <canvas id="gameCanvas" style="border: solid 1px gray;"></canvas><br/>
+<div id="scoreboard" style="color:white;visibility:False;Display:None"></div>
+<script type="text/javascript" src="js/arkanoid.js"></script>
 </body>
 </html>
