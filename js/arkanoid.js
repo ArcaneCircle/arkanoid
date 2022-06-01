@@ -181,32 +181,21 @@ function ArkanoidGame(canvas, context) {
 
 		if (this.gameOver) {
                         ordarr = [];
-			                  context.fillStyle = 'rgb(255,255,0)';
-			                  context.font = 'bold 20px Arial';
-			                  if (is_update==false)
-                           sendMsg(this.score);
-                           is_update=true
+			context.fillStyle = 'rgb(255,255,0)';
+			context.font = 'bold 20px Arial';
+			if (is_update==false) {
+         sendMsg(this.score);
+         is_update=true;}
                         lines = document.getElementById('scoreboard').innerHTML.split('<br>');
                         context.fillText('Scores', canvas.width / 2 - 40, (canvas.height / 2)-20);
-                        max_value = 0;
                         for (x=0; x<lines.length; x++) {
-                            line = lines[x].split(' ');
-                            if (line[0]>=max_value) {
-                               max_value=line[0]
-                               ordarr.splice(0, 0, lines[x]);
-                            }
-                            else {
-                               ordarr.splice(x, 0, lines[x]);
-                            }
+                            line = lines[x].split(" ")
+                            ordarr.push({score_point:line[0],user_name:line[1]})
                         }
-                        for (i=0; i<ordarr.length; i++) {
-                            line_score = ordarr[i].split(" ");
-                            invert_score="";
-                            for (n=line_score.length-1; n>=0; n--) {
-                                invert_score+=line_score[n]+" "
-                            }
-                            if (invert_score!="" && invert_score!=" ")
-                               context.fillText(i+1+" - "+invert_score, canvas.width / 2 - 40, (canvas.height / 2)+i*20);
+                        ordarr.sort((b,a) => a.score_point - b.score_point);
+                        for (i=0; i<ordarr.length-1; i++) {
+                            invert_score=ordarr[i].user_name+" "+ordarr[i].score_point;
+                            context.fillText(i+1+" - "+invert_score, canvas.width / 2 - 40, (canvas.height / 2)+i*20);
                         }
 		}
 
@@ -430,7 +419,7 @@ function checkCanvasIsSupported() {
 	canvas.width =  (window.innerWidth || document.documentElement.clientWidth ||
 document.body.clientWidth)-15;
 	canvas.height = (window.innerHeight|| document.documentElement.clientHeight||
-document.body.clientHeight)-50;
+document.body.clientHeight)-100;
 	canvas.style.cursor = "none";
 	if (canvas.getContext) {
 		context = canvas.getContext('2d');
