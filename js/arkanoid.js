@@ -4,6 +4,8 @@
 // Author: delimitry
 //-----------------------------------------------------------------------------------------------------------
 
+var is_update = false;
+
 function Paddle(x, y, width, height) {
 	this.x = x;
 	this.y = y;
@@ -179,9 +181,11 @@ function ArkanoidGame(canvas, context) {
 
 		if (this.gameOver) {
                         ordarr = [];
-			context.fillStyle = 'rgb(255,255,0)';
-			context.font = 'bold 20px Arial';
-                        sendMsg(this.score);
+			                  context.fillStyle = 'rgb(255,255,0)';
+			                  context.font = 'bold 20px Arial';
+			                  if (is_update==false)
+                           sendMsg(this.score);
+                           is_update=true
                         lines = document.getElementById('scoreboard').innerHTML.split('<br>');
                         context.fillText('Scores', canvas.width / 2 - 40, (canvas.height / 2)-20);
                         max_value = 0;
@@ -201,10 +205,9 @@ function ArkanoidGame(canvas, context) {
                             for (n=line_score.length-1; n>=0; n--) {
                                 invert_score+=line_score[n]+" "
                             }
-                            if (i+1<ordarr.length)
+                            if (invert_score!="" && invert_score!=" ")
                                context.fillText(i+1+" - "+invert_score, canvas.width / 2 - 40, (canvas.height / 2)+i*20);
                         }
-                        return false;
 		}
 
 		if (this.gameWin) {
@@ -477,7 +480,9 @@ document.onclick = function(){
         }
 }
 function sendMsg(msg) {
-             window.webxdc.sendUpdate({payload: {name: window.webxdc.selfName, msg: msg}}, window.webxdc.selfName+' score "'+msg+'"');
+             const info = window.webxdc.selfName + ' scored ' + msg + ' in Arkanoid!';
+             window.webxdc.sendUpdate({payload: {name: window.webxdc.selfName, msg: msg}, info: info}, info);
+             return false;
          }
 
 function receiveUpdate(update) {
