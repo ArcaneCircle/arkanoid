@@ -190,7 +190,14 @@ function ArkanoidGame(canvas, context) {
                         context.fillText('Scores', canvas.width / 2 - 40, (canvas.height / 2)-20);
                         for (x=0; x<lines.length; x++) {
                             line = lines[x].split(" ")
-                            ordarr.push({score_point:line[0],user_name:line[1]})
+                            coincide = ordarr.findIndex((obj => obj.user_name === line[1]));
+                            if (coincide>=0) { 
+                               if (line[0]>ordarr[coincide].score_point)
+                                 ordarr[coincide].score_point = line[0];
+                            }
+                            else {
+                               ordarr.push({score_point:line[0],user_name:line[1]});
+                            }
                         }
                         ordarr.sort((b,a) => a.score_point - b.score_point);
                         for (i=0; i<ordarr.length-1; i++) {
