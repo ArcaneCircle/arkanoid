@@ -5,6 +5,7 @@
 //-----------------------------------------------------------------------------------------------------------
 
 var is_update = false;
+var ordarr = [];
 
 function Paddle(x, y, width, height) {
 	this.x = x;
@@ -180,36 +181,37 @@ function ArkanoidGame(canvas, context) {
 		}
 
 		if (this.gameOver) {
-                        ordarr = [];
 			context.fillStyle = 'rgb(255,255,0)';
 			context.font = 'bold 20px Arial';
-			if (is_update==false) {
-         sendMsg(this.score);
-         is_update=true;}
-                        lines = document.getElementById('scoreboard').innerHTML.split('<br>');
-                        context.fillText('Scores', canvas.width / 2 - 40, (canvas.height / 2)-20);
-                        for (x=0; x<lines.length; x++) {
-                            line = lines[x].split(" ")
-                            coincide = ordarr.findIndex((obj => obj.user_name === line[1]));
-                            if (coincide>=0) { 
-                               if (line[0]>ordarr[coincide].score_point)
-                                 ordarr[coincide].score_point = line[0];
-                            }
-                            else {
-                               ordarr.push({score_point:line[0],user_name:line[1]});
-                            }
-                        }
-                        ordarr.sort((b,a) => a.score_point - b.score_point);
-                        for (i=0; i<ordarr.length-1; i++) {
-                            invert_score=ordarr[i].user_name+" "+ordarr[i].score_point;
-                            context.fillText(i+1+" - "+invert_score, canvas.width / 2 - 40, (canvas.height / 2)+i*20);
-                        }
+      context.fillText('Scores', canvas.width / 2 - 50, (canvas.height / 2)-20);
+      if (is_update==false) {
+         coincide = ordarr.findIndex((obj => obj.user_name === window.webxdc.selfName));
+         if (coincide>=0) { 
+            if (this.score>ordarr[coincide].score_point) {
+               ordarr[coincide].score_point = this.score;
+               sendMsg(this.score);
+            }
+         }
+         else {
+            sendMsg(this.score);
+         }
+         is_update=true;
+      }
+      
+      for (i=0; i<ordarr.length; i++) {
+          invert_score=ordarr[i].user_name+" "+ordarr[i].score_point;
+          context.fillText(i+1+" - "+invert_score, canvas.width / 2 - 50, (canvas.height / 2)+i*20);
+      }
 		}
 
 		if (this.gameWin) {
 			context.fillStyle = 'rgb(255,255,0)';
 			context.font = 'bold 20px Arial';
 			context.fillText('You Win', canvas.width / 2 - 40, canvas.height / 2);
+			if (is_update==false) {
+			   sendMsg(this.score);
+			   is_update=true;
+			}
 		}
 
 		context.fillStyle = 'rgb(255,255,220)';
@@ -475,6 +477,19 @@ document.onclick = function(){
            document.location.reload(true);
         }
 }
+
+function getScores(payload) {
+      coincide = ordarr.findIndex((obj => obj.user_name === payload.name));
+      if (coincide>=0) { 
+          if (payload.msg>ordarr[coincide].score_point)
+             ordarr[coincide].score_point = payload.msg;
+      }
+      else {
+          ordarr.push({score_point:payload.msg,user_name:payload.name});
+      }
+  ordarr.sort((b,a) => a.score_point - b.score_point);
+}
+
 function sendMsg(msg) {
              const info = window.webxdc.selfName + ' scored ' + msg + ' in Arkanoid!';
              window.webxdc.sendUpdate({payload: {name: window.webxdc.selfName, msg: msg}, info: info}, info);
@@ -482,8 +497,6 @@ function sendMsg(msg) {
          }
 
 function receiveUpdate(update) {
-             if (document.getElementById('scoreboard').innerText.indexOf(update.payload.msg + " " + update.payload.name)==-1) {
-                document.getElementById('scoreboard').innerHTML += "<br>" + update.payload.msg + " " + update.payload.name;
-             }
+             getScores(update.payload);
          }
 window.webxdc.setUpdateListener(receiveUpdate, 0);
