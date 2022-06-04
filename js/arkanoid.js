@@ -200,7 +200,7 @@ function ArkanoidGame(canvas, context) {
       
       for (i=0; i<ordarr.length; i++) {
           invert_score=ordarr[i].user_name+" "+ordarr[i].score_point;
-          context.fillText(i+1+" - "+invert_score, canvas.width / 2 - 50, (canvas.height / 2)+i*20);
+          context.fillText(i+1+". "+invert_score, canvas.width / 2 - 50, (canvas.height / 2)+i*20);
       }
 		}
 
