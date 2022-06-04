@@ -1,5 +1,5 @@
 # uncomment the following line and set it to your Webxdc name - otherwise the file name will be used
-name = "Arkanoid v1.2"
+name = "Arkanoid v1.3.2"
 
 # uncomment the following line and set it your source repo; it is shown in the Webxdc's menu then
 source_code_url = "https://githuh.com/Nenirey/arkanoid-js"
