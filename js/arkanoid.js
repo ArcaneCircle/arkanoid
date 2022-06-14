@@ -183,9 +183,9 @@ function ArkanoidGame(canvas, context) {
 		if (this.gameOver) {
 			context.fillStyle = 'rgb(255,255,0)';
 			context.font = 'bold 20px Arial';
-      context.fillText('Scores', canvas.width / 2 - 50, (canvas.height / 2)-20);
+      context.fillText('Scoreboard', canvas.width / 2 - 50, (canvas.height / 2)-20);
       if (is_update==false) {
-         coincide = ordarr.findIndex((obj => obj.user_name === window.webxdc.selfName));
+         coincide = ordarr.findIndex((obj => obj.addr === window.webxdc.selfAddr));
          if (coincide>=0) { 
             if (this.score>ordarr[coincide].score_point) {
                ordarr[coincide].score_point = this.score;
@@ -221,6 +221,16 @@ function ArkanoidGame(canvas, context) {
 		context.fillStyle = 'rgb(255,255,220)';
 		context.font = 'bold 15px Arial';
 		context.fillText('Lifes: ' + this.lifes, 5, 35);
+		context.fillStyle = 'rgb(255,255,0)';
+		context.font = 'bold 20px Arial';
+		if(this.ball.dir==BallDirs.NONE){
+		  if (ordarr.length>0)
+		     context.fillText('Scoreboard', canvas.width / 2 - 50, (canvas.height / 2)-20);
+		  for (i=0; i<ordarr.length; i++) {
+          invert_score=ordarr[i].user_name+" "+ordarr[i].score_point;
+          context.fillText(i+1+". "+invert_score, canvas.width / 2 - 50, (canvas.height / 2)+i*20);
+      }
+		}
 	}
 
 	this.update = function() {
@@ -479,20 +489,27 @@ document.onclick = function(){
 }
 
 function getScores(payload) {
-      coincide = ordarr.findIndex((obj => obj.user_name === payload.name));
+      coincide = ordarr.findIndex((obj => obj.addr === payload.addr));
       if (coincide>=0) { 
           if (payload.msg>ordarr[coincide].score_point)
              ordarr[coincide].score_point = payload.msg;
       }
       else {
-          ordarr.push({score_point:payload.msg,user_name:payload.name});
+          ordarr.push({score_point:payload.msg,user_name:payload.name,addr:payload.addr});
       }
   ordarr.sort((b,a) => a.score_point - b.score_point);
 }
 
 function sendMsg(msg) {
              const info = window.webxdc.selfName + ' scored ' + msg + ' in Arkanoid!';
-             window.webxdc.sendUpdate({payload: {name: window.webxdc.selfName, msg: msg}, info: info}, info);
+             getScores({msg:arkanoidGame.score,name:window.webxdc.selfName,addr:window.webxdc.selfAddr});
+             if (ordarr.length>0) {
+                ordarr.sort((b,a) => a.score_point - b.score_point);
+                summary = ordarr[0].user_name+" is the one with "+ordarr[0].score_point;
+             }   
+             else
+                summary = window.webxdc.selfName+" is the one with "+arkanoidGame.score;
+             window.webxdc.sendUpdate({payload: {name: window.webxdc.selfName, msg: msg, addr: window.webxdc.selfAddr}, summary: summary, info: info}, info);
              return false;
          }
 
