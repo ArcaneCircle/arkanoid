@@ -8,12 +8,12 @@ let BallDirs = {
 };
 let BricksTypes = {
     DEFAULT : 1,
-    ICE : 1,
+    LIME: 1,
     WOOD : 2,
     STONE : 3,
     IRON : 4,
     STEEL : 5,
-    LIME: 6,
+    ICE : 6,
 };
 let KeyCodes = {
     SPACE : 32
@@ -105,7 +105,7 @@ function ArkanoidGame(canvas, context) {
     var BRICK_SCORE = 1;
 
     this.level = 0;
-    this.lifes = 1;
+    this.lifes = 2;
     this.score = 0;
     this.paddle = new Paddle(canvas.width / 2 - PADDLE_WIDTH / 2, canvas.height - 20, PADDLE_WIDTH, PADDLE_HEIGHT);
     this.ball = new Ball(canvas.width / 2, canvas.height / 2, BALL_RADIUS, BallDirs.NONE, BALL_DEFAULT_SPEED);
@@ -114,9 +114,9 @@ function ArkanoidGame(canvas, context) {
     this.bricks = new Bricks(5, 2, BRICK_WIDTH, BRICK_HEIGHT);
 
     this.init = function() {
-	this.level = parseInt(localStorage.level) || 0;
+	this.level = parseInt(localStorage.level) || this.level;
 	this.lifes = parseInt(localStorage.lifes) || this.lifes;
-	this.score = parseInt(localStorage.score) || 0;
+	this.score = parseInt(localStorage.score) || this.score;
 	this.gameOver = false;
 	this.gamePaused = false;
 	this.ball.dir = BallDirs.NONE;
@@ -142,17 +142,34 @@ function ArkanoidGame(canvas, context) {
 		    this.bricks.bricks[i][j].lifes = BricksTypes.DEFAULT + i;
 		}
 	    }
+            this.bricks.bricks[2][1].lifes = -1;
+            this.bricks.bricks[2][4].lifes = -1;
 	    break;
 
 	default:
-	    this.bricks = new Bricks(6, 10, brick_width, BRICK_HEIGHT);
+	    this.bricks = new Bricks(6, 12, brick_width, BRICK_HEIGHT);
             let empty = 0;
+            let permanent = 0;
+            let permanent2 = 0;
 	    for (var i = this.bricks.bricks.length-1; i >= 0 ; i--) {
 		for (var j = 0; j < this.bricks.bricks[i].length; j++) {
-                    let lifes = parseInt(Math.random()*10) % 7 * (parseInt(Math.random()*10) % 2);
-                    if (lifes === 0) {
-                        if (empty++ > 15) {
-                            lifes = (parseInt(Math.random()*10) % 6) + 1;
+                    let lifes = 0;
+                    if (i === this.bricks.bricks.length-1) {
+                        if (permanent2 < 3) {
+                            lifes = -1 * (parseInt(Math.random()*10) % 2);
+                            if (lifes === -1) permanent2++;
+                        }
+                    } else if (i !== this.bricks.bricks.length-2) {
+                        lifes = parseInt(Math.random()*10) % 7 * (parseInt(Math.random()*10) % 2);
+                        if (lifes === 0) {
+                            if (empty++ > 15) {
+                                if (parseInt(Math.random()*10) % 2 && permanent < 1) {
+                                    lifes = -1;
+                                    permanent++;
+                                } else {
+                                    lifes = (parseInt(Math.random()*10) % 6) + 1;
+                                }
+                            }
                         }
                     }
 		    this.bricks.bricks[i][j].lifes = lifes;
@@ -172,15 +189,16 @@ function ArkanoidGame(canvas, context) {
     this.drawBricks = function() {
 	for (var i = 0; i < this.bricks.bricks.length; i++) {
 	    for (var j = 0; j < this.bricks.bricks[i].length; j++) {
-		if (this.bricks.bricks[i][j].lifes > 0) {
-		    switch (this.bricks.bricks[i][j].lifes) {
-                    case BricksTypes.ICE: context.fillStyle = 'rgba(135,206,235,0.9)'; break;
+                let lifes = this.bricks.bricks[i][j].lifes;
+		if (lifes !== 0) {
+		    switch (lifes) {
+                    case BricksTypes.ICE: context.fillStyle = 'rgb(15,225,255)'; break;
 		    case BricksTypes.WOOD: context.fillStyle = 'rgb(255,193,7)'; break;
 		    case BricksTypes.STONE: context.fillStyle = 'rgb(121,85,72)'; break;
 		    case BricksTypes.IRON: context.fillStyle = 'rgb(103,58,183)'; break;
-		    case BricksTypes.STEEL: context.fillStyle = 'rgb(15,225,255)'; break;
+		    case BricksTypes.STEEL: context.fillStyle = 'rgb(244,67,54)'; break;
                     case BricksTypes.LIME: context.fillStyle = 'rgb(205,220,57)'; break;
-		    default: context.fillStyle = 'rgb(255,0,0)';
+		    default: context.fillStyle = 'rgb(241,241,241)';
 		    }
 		    context.fillRect(this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width - 2, this.bricks.bricks[i][j].height - 2);
 		}
@@ -195,7 +213,7 @@ function ArkanoidGame(canvas, context) {
 	this.drawBall();
 
 	// draw paddle
-	context.fillStyle = 'rgba(253,245,230, 0.8)';
+	context.fillStyle = 'rgb(241,241,241)';
 	context.fillRect(this.paddle.x, this.paddle.y, this.paddle.width, this.paddle.height);
 
 	this.drawBricks();
@@ -281,65 +299,82 @@ function ArkanoidGame(canvas, context) {
 	// bounces
 	for (var i = 0; i < this.bricks.bricks.length; i++) {
 	    for (var j = 0; j < this.bricks.bricks[i].length; j++) {
-		if (this.bricks.bricks[i][j].lifes > 0) {
+                let brickLifes = this.bricks.bricks[i][j].lifes;
+		if (brickLifes !== 0) {
 		    if (this.ball.dir == BallDirs.LEFT + BallDirs.UP) {
 			if (this.isPointInRect(this.ball.x - this.ball.speed, this.ball.y - 0, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
 			    this.ball.x = this.bricks.bricks[i][j].x + this.bricks.bricks[i][j].width + this.ball.speed;
 			    this.ball.dir = this.ball.dir - BallDirs.LEFT + BallDirs.RIGHT;
-			    this.bricks.bricks[i][j].lifes--;
-			    this.score += BRICK_SCORE;
+                            if (brickLifes > 0) {
+			        this.bricks.bricks[i][j].lifes--;
+			        this.score += BRICK_SCORE;
+                            }
 			    return;
 			}
 			if (this.isPointInRect(this.ball.x - 0, this.ball.y - this.ball.speed, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
 			    this.ball.y = this.bricks.bricks[i][j].y + this.bricks.bricks[i][j].height + this.ball.speed;
 			    this.ball.dir = this.ball.dir - BallDirs.UP + BallDirs.DOWN;
-			    this.bricks.bricks[i][j].lifes--;
-			    this.score += BRICK_SCORE;
+                            if (brickLifes > 0) {
+			        this.bricks.bricks[i][j].lifes--;
+			        this.score += BRICK_SCORE;
+                            }
 			    return;
 			}
 		    } else if (this.ball.dir == BallDirs.LEFT + BallDirs.DOWN) {
 			if (this.isPointInRect(this.ball.x - this.ball.speed, this.ball.y + 0, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
 			    this.ball.x = this.bricks.bricks[i][j].x + this.bricks.bricks[i][j].width + this.ball.speed;
 			    this.ball.dir = this.ball.dir - BallDirs.LEFT + BallDirs.RIGHT;
-			    this.bricks.bricks[i][j].lifes--;
-			    this.score += BRICK_SCORE;
+                            if (brickLifes > 0) {
+			        this.bricks.bricks[i][j].lifes--;
+			        this.score += BRICK_SCORE;
+                            }
 			    return;
 			}
 			if (this.isPointInRect(this.ball.x - 0, this.ball.y + this.ball.speed, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
 			    this.ball.y = this.bricks.bricks[i][j].y - this.ball.speed;
 			    this.ball.dir = this.ball.dir - BallDirs.DOWN + BallDirs.UP;
-			    this.bricks.bricks[i][j].lifes--;
-			    this.score += BRICK_SCORE;
+                            if (brickLifes > 0) {
+			        this.bricks.bricks[i][j].lifes--;
+			        this.score += BRICK_SCORE;
+                            }
 			    return;
 			}
 		    } else if (this.ball.dir == BallDirs.RIGHT + BallDirs.UP) {
 			if (this.isPointInRect(this.ball.x + this.ball.speed, this.ball.y - 0, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
 			    this.ball.x = this.bricks.bricks[i][j].x - this.ball.speed;
 			    this.ball.dir = this.ball.dir - BallDirs.RIGHT + BallDirs.LEFT;
-			    this.bricks.bricks[i][j].lifes--;
-			    this.score += BRICK_SCORE;
+                            if (brickLifes > 0) {
+			        this.bricks.bricks[i][j].lifes--;
+			        this.score += BRICK_SCORE;
+                            }
 			    return;
 			}
 			if (this.isPointInRect(this.ball.x + 0, this.ball.y - this.ball.speed, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
 			    this.ball.y = this.bricks.bricks[i][j].y + this.bricks.bricks[i][j].height + this.ball.speed;
 			    this.ball.dir = this.ball.dir - BallDirs.UP + BallDirs.DOWN;
-			    this.bricks.bricks[i][j].lifes--;
-			    this.score += BRICK_SCORE;
+                            if (brickLifes > 0) {
+			        this.bricks.bricks[i][j].lifes--;
+			        this.score += BRICK_SCORE;
+                            }
 			    return;
 			}
 		    } else if (this.ball.dir == BallDirs.RIGHT + BallDirs.DOWN) {
 			if (this.isPointInRect(this.ball.x + this.ball.speed, this.ball.y + 0, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
 			    this.ball.x = this.bricks.bricks[i][j].x - this.ball.speed;
 			    this.ball.dir = this.ball.dir - BallDirs.RIGHT + BallDirs.LEFT;
-			    this.bricks.bricks[i][j].lifes--;
-			    this.score += BRICK_SCORE;
+                            if (brickLifes > 0) {
+			        this.bricks.bricks[i][j].lifes--;
+			        this.score += BRICK_SCORE;
+                            }
 			    return;
 			}
 			if (this.isPointInRect(this.ball.x + 0, this.ball.y + this.ball.speed, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
 			    this.ball.y = this.bricks.bricks[i][j].y - this.ball.speed;
 			    this.ball.dir = this.ball.dir - BallDirs.DOWN + BallDirs.UP;
-			    this.bricks.bricks[i][j].lifes--;
-			    this.score += BRICK_SCORE;
+                            if (brickLifes > 0) {
+			        this.bricks.bricks[i][j].lifes--;
+			        this.score += BRICK_SCORE;
+                            }
 			    return;
 			}
 		    }
