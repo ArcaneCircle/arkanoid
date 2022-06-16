@@ -195,7 +195,7 @@ function ArkanoidGame(canvas, context) {
 	this.drawBall();
 
 	// draw paddle
-	context.fillStyle = 'rgb(155,110,5)';
+	context.fillStyle = 'rgba(253,245,230, 0.8)';
 	context.fillRect(this.paddle.x, this.paddle.y, this.paddle.width, this.paddle.height);
 
 	this.drawBricks();
