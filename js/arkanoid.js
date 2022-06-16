@@ -41,16 +41,16 @@ window.addEventListener("load", () => {
         document.onkeydown = function(event) {
             var keyCode;
             if (event == null) {
-	        keyCode = window.event.keyCode;
+                keyCode = window.event.keyCode;
             } else {
-	        keyCode = event.keyCode;
+                keyCode = event.keyCode;
             }
             switch (keyCode) {
             case KeyCodes.SPACE:
-	        arkanoidGame.togglePause();
-	        break;
+                arkanoidGame.togglePause();
+                break;
             default:
-	        break;
+                break;
             }
         }
     });
@@ -82,10 +82,10 @@ function Brick(x, y, width, height, type) {
 function Bricks(hor_num, vert_num, brick_width, brick_height) {
     this.bricks = new Array();
     for (var i = 0; i < vert_num; i++) {
-	this.bricks[i] = new Array();
-	for (var j = 0; j < hor_num; j++) {
-	    this.bricks[i][j] = new Brick(j * brick_width, i * brick_height, brick_width, brick_height, BricksTypes.DEFAULT);
-	}
+        this.bricks[i] = new Array();
+        for (var j = 0; j < hor_num; j++) {
+            this.bricks[i][j] = new Brick(j * brick_width, i * brick_height, brick_width, brick_height, BricksTypes.DEFAULT);
+        }
     }
 }
 
@@ -114,45 +114,45 @@ function ArkanoidGame(canvas, context) {
     this.bricks = new Bricks(5, 2, BRICK_WIDTH, BRICK_HEIGHT);
 
     this.init = function() {
-	this.level = parseInt(localStorage.level) || this.level;
-	this.lifes = parseInt(localStorage.lifes) || this.lifes;
-	this.score = parseInt(localStorage.score) || this.score;
-	this.gameOver = false;
-	this.gamePaused = false;
-	this.ball.dir = BallDirs.NONE;
-	this.initLevel(this.level);
+        this.level = parseInt(localStorage.level) || this.level;
+        this.lifes = parseInt(localStorage.lifes) || this.lifes;
+        this.score = parseInt(localStorage.score) || this.score;
+        this.gameOver = false;
+        this.gamePaused = false;
+        this.ball.dir = BallDirs.NONE;
+        this.initLevel(this.level);
     };
 
     this.initLevel = function(level) {
         let brick_width = Math.round(window.innerWidth/6)-2;
-	switch (level) {
-	case 0:
-	    this.bricks = new Bricks(6, 2, brick_width, BRICK_HEIGHT);
-	    for (var i = 0; i < this.bricks.bricks.length; i++) {
-		for (var j = 0; j < this.bricks.bricks[i].length; j++) {
-		    this.bricks.bricks[i][j].lifes = BricksTypes.DEFAULT;
-		}
-	    }
-	    break;
+        switch (level) {
+        case 0:
+            this.bricks = new Bricks(6, 2, brick_width, BRICK_HEIGHT);
+            for (var i = 0; i < this.bricks.bricks.length; i++) {
+                for (var j = 0; j < this.bricks.bricks[i].length; j++) {
+                    this.bricks.bricks[i][j].lifes = BricksTypes.DEFAULT;
+                }
+            }
+            break;
 
-	case 1:
+        case 1:
             this.bricks = new Bricks(6, 3, brick_width, BRICK_HEIGHT);
-	    for (var i = 0; i < this.bricks.bricks.length; i++) {
-		for (var j = 0; j < this.bricks.bricks[i].length; j++) {
-		    this.bricks.bricks[i][j].lifes = BricksTypes.DEFAULT + i;
-		}
-	    }
+            for (var i = 0; i < this.bricks.bricks.length; i++) {
+                for (var j = 0; j < this.bricks.bricks[i].length; j++) {
+                    this.bricks.bricks[i][j].lifes = BricksTypes.DEFAULT + i;
+                }
+            }
             this.bricks.bricks[2][1].lifes = -1;
             this.bricks.bricks[2][4].lifes = -1;
-	    break;
+            break;
 
-	default:
-	    this.bricks = new Bricks(6, 12, brick_width, BRICK_HEIGHT);
+        default:
+            this.bricks = new Bricks(6, 12, brick_width, BRICK_HEIGHT);
             let empty = 0;
             let permanent = 0;
             let permanent2 = 0;
-	    for (var i = this.bricks.bricks.length-1; i >= 0 ; i--) {
-		for (var j = 0; j < this.bricks.bricks[i].length; j++) {
+            for (var i = this.bricks.bricks.length-1; i >= 0 ; i--) {
+                for (var j = 0; j < this.bricks.bricks[i].length; j++) {
                     let lifes = 0;
                     if (i === this.bricks.bricks.length-1) {
                         if (permanent2 < 3) {
@@ -172,285 +172,285 @@ function ArkanoidGame(canvas, context) {
                             }
                         }
                     }
-		    this.bricks.bricks[i][j].lifes = lifes;
-		}
-	    }
-	    break;
-	}
+                    this.bricks.bricks[i][j].lifes = lifes;
+                }
+            }
+            break;
+        }
     };
 
     this.drawBall = function() {
-	context.beginPath();
-	context.arc(this.ball.x, this.ball.y, this.ball.radius, 0, 2 * Math.PI, false);
-	context.fillStyle = 'yellow';
-	context.fill();
+        context.beginPath();
+        context.arc(this.ball.x, this.ball.y, this.ball.radius, 0, 2 * Math.PI, false);
+        context.fillStyle = 'yellow';
+        context.fill();
     };
 
     this.drawBricks = function() {
-	for (var i = 0; i < this.bricks.bricks.length; i++) {
-	    for (var j = 0; j < this.bricks.bricks[i].length; j++) {
+        for (var i = 0; i < this.bricks.bricks.length; i++) {
+            for (var j = 0; j < this.bricks.bricks[i].length; j++) {
                 let lifes = this.bricks.bricks[i][j].lifes;
-		if (lifes !== 0) {
-		    switch (lifes) {
+                if (lifes !== 0) {
+                    switch (lifes) {
                     case BricksTypes.ICE: context.fillStyle = 'rgb(15,225,255)'; break;
-		    case BricksTypes.WOOD: context.fillStyle = 'rgb(255,193,7)'; break;
-		    case BricksTypes.STONE: context.fillStyle = 'rgb(121,85,72)'; break;
-		    case BricksTypes.IRON: context.fillStyle = 'rgb(103,58,183)'; break;
-		    case BricksTypes.STEEL: context.fillStyle = 'rgb(244,67,54)'; break;
+                    case BricksTypes.WOOD: context.fillStyle = 'rgb(255,193,7)'; break;
+                    case BricksTypes.STONE: context.fillStyle = 'rgb(121,85,72)'; break;
+                    case BricksTypes.IRON: context.fillStyle = 'rgb(103,58,183)'; break;
+                    case BricksTypes.STEEL: context.fillStyle = 'rgb(244,67,54)'; break;
                     case BricksTypes.LIME: context.fillStyle = 'rgb(205,220,57)'; break;
-		    default: context.fillStyle = 'rgb(241,241,241)';
-		    }
-		    context.fillRect(this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width - 2, this.bricks.bricks[i][j].height - 2);
-		}
-	    }
-	}
+                    default: context.fillStyle = 'rgb(241,241,241)';
+                    }
+                    context.fillRect(this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width - 2, this.bricks.bricks[i][j].height - 2);
+                }
+            }
+        }
     };
 
     this.draw = function() {
-	context.fillStyle = 'rgb(0,10,0)';
-	context.fillRect(0, 0, canvas.width, canvas.height);
+        context.fillStyle = 'rgb(0,10,0)';
+        context.fillRect(0, 0, canvas.width, canvas.height);
 
-	this.drawBall();
+        this.drawBall();
 
-	// draw paddle
-	context.fillStyle = 'rgb(241,241,241)';
-	context.fillRect(this.paddle.x, this.paddle.y, this.paddle.width, this.paddle.height);
+        // draw paddle
+        context.fillStyle = 'rgb(241,241,241)';
+        context.fillRect(this.paddle.x, this.paddle.y, this.paddle.width, this.paddle.height);
 
-	this.drawBricks();
+        this.drawBricks();
 
-	if (this.gamePaused && !this.gameOver) {
-	    context.fillStyle = 'rgb(255,255,0)';
-	    context.font = 'bold 20px Arial';
-	    context.fillText('Pause', canvas.width / 2 - 30, canvas.height / 2);
-	} else if (this.gameOver) {
+        if (this.gamePaused && !this.gameOver) {
+            context.fillStyle = 'rgb(255,255,0)';
+            context.font = 'bold 20px Arial';
+            context.fillText('Pause', canvas.width / 2 - 30, canvas.height / 2);
+        } else if (this.gameOver) {
             if (!this.gamePaused) {
                 window.highscores.setScore(this.score);
                 this.bricks = new Bricks(0, 0, BRICK_WIDTH, BRICK_HEIGHT);
             }
             this.drawScoreboard();
             this.gamePaused = true;
-	} else if(this.ball.dir==BallDirs.NONE) {
+        } else if(this.ball.dir==BallDirs.NONE) {
             this.drawScoreboard();
-	}
+        }
 
-	context.fillStyle = 'rgb(255,255,220)';
-	context.font = 'bold 15px Arial';
-	context.fillText('Score: ' + this.score, 5, 15);
+        context.fillStyle = 'rgb(255,255,220)';
+        context.font = 'bold 15px Arial';
+        context.fillText('Score: ' + this.score, 5, 15);
 
-	context.fillStyle = 'rgb(255,255,220)';
-	context.font = 'bold 15px Arial';
-	context.fillText('Lifes: ' + this.lifes, 5, 35);
+        context.fillStyle = 'rgb(255,255,220)';
+        context.font = 'bold 15px Arial';
+        context.fillText('Lifes: ' + this.lifes, 5, 35);
     };
 
     this.update = function() {
-	if (this.gamePaused || this.gameOver) return;
+        if (this.gamePaused || this.gameOver) return;
 
-	// update ball pos
-	if (this.ball.dir & BallDirs.RIGHT) this.ball.x += this.ball.speed;
-	else if (this.ball.dir & BallDirs.LEFT) this.ball.x -= this.ball.speed;
-	if (this.ball.dir & BallDirs.UP) this.ball.y -= this.ball.speed;
-	else if (this.ball.dir & BallDirs.DOWN) this.ball.y += this.ball.speed;
+        // update ball pos
+        if (this.ball.dir & BallDirs.RIGHT) this.ball.x += this.ball.speed;
+        else if (this.ball.dir & BallDirs.LEFT) this.ball.x -= this.ball.speed;
+        if (this.ball.dir & BallDirs.UP) this.ball.y -= this.ball.speed;
+        else if (this.ball.dir & BallDirs.DOWN) this.ball.y += this.ball.speed;
 
-	// ball bounce from paddle
-	if ((this.ball.x + this.ball.radius > this.paddle.x && this.ball.x - this.ball.radius < this.paddle.x + this.paddle.width) &&
-	    (this.ball.y + this.ball.radius > this.paddle.y)) {
-	    if (this.ball.speed < BALL_MAX_SPEED) this.ball.speed += 0.5;
-	    if (this.ball.dir & BallDirs.DOWN) {
-		this.ball.dir = this.ball.dir - BallDirs.DOWN + BallDirs.UP;
-	    } else if (this.ball.dir & BallDirs.UP) {
-		this.ball.dir = this.ball.dir - BallDirs.UP + BallDirs.DOWN;
-	    }
-	}
+        // ball bounce from paddle
+        if ((this.ball.x + this.ball.radius > this.paddle.x && this.ball.x - this.ball.radius < this.paddle.x + this.paddle.width) &&
+            (this.ball.y + this.ball.radius > this.paddle.y)) {
+            if (this.ball.speed < BALL_MAX_SPEED) this.ball.speed += 0.5;
+            if (this.ball.dir & BallDirs.DOWN) {
+                this.ball.dir = this.ball.dir - BallDirs.DOWN + BallDirs.UP;
+            } else if (this.ball.dir & BallDirs.UP) {
+                this.ball.dir = this.ball.dir - BallDirs.UP + BallDirs.DOWN;
+            }
+        }
 
-	// update ball
-	if (this.ball.x - this.ball.radius < 0) {
-	    this.ball.x = this.ball.radius;
-	    this.ball.dir = this.ball.dir - BallDirs.LEFT + BallDirs.RIGHT;
-	}
-	if (this.ball.x + this.ball.radius > canvas.width) {
-	    this.ball.x = canvas.width - this.ball.radius;
-	    this.ball.dir = this.ball.dir - BallDirs.RIGHT + BallDirs.LEFT;
-	}
-	if (this.ball.y - this.ball.radius < 0) {
-	    this.ball.y = this.ball.radius;
-	    this.ball.dir = this.ball.dir - BallDirs.UP + BallDirs.DOWN;
-	}
+        // update ball
+        if (this.ball.x - this.ball.radius < 0) {
+            this.ball.x = this.ball.radius;
+            this.ball.dir = this.ball.dir - BallDirs.LEFT + BallDirs.RIGHT;
+        }
+        if (this.ball.x + this.ball.radius > canvas.width) {
+            this.ball.x = canvas.width - this.ball.radius;
+            this.ball.dir = this.ball.dir - BallDirs.RIGHT + BallDirs.LEFT;
+        }
+        if (this.ball.y - this.ball.radius < 0) {
+            this.ball.y = this.ball.radius;
+            this.ball.dir = this.ball.dir - BallDirs.UP + BallDirs.DOWN;
+        }
 
-	if (this.ball.y + this.ball.radius > canvas.height) {
-	    // lost one life
-	    localStorage.lifes = --this.lifes;
-	    this.ball.speed = BALL_DEFAULT_SPEED;
-	    if (this.lifes == 0) {
-		this.gameOver = true;
+        if (this.ball.y + this.ball.radius > canvas.height) {
+            // lost one life
+            localStorage.lifes = --this.lifes;
+            this.ball.speed = BALL_DEFAULT_SPEED;
+            if (this.lifes == 0) {
+                this.gameOver = true;
                 localStorage.level = 0;
                 localStorage.score = 0;
-	    } else {
-		this.ball.x = canvas.width / 2;
-		this.ball.y = canvas.height / 2;
-		this.ball.dir = BallDirs.NONE;
-	    }
-	}
+            } else {
+                this.ball.x = canvas.width / 2;
+                this.ball.y = canvas.height / 2;
+                this.ball.dir = BallDirs.NONE;
+            }
+        }
 
-	if (this.ball.dir == BallDirs.NONE) {
-	    this.ball.x = this.paddle.x + this.paddle.width / 2;
-	    this.ball.y = this.paddle.y - this.ball.radius * 2;
-	}
+        if (this.ball.dir == BallDirs.NONE) {
+            this.ball.x = this.paddle.x + this.paddle.width / 2;
+            this.ball.y = this.paddle.y - this.ball.radius * 2;
+        }
 
-	// bounces
-	for (var i = 0; i < this.bricks.bricks.length; i++) {
-	    for (var j = 0; j < this.bricks.bricks[i].length; j++) {
+        // bounces
+        for (var i = 0; i < this.bricks.bricks.length; i++) {
+            for (var j = 0; j < this.bricks.bricks[i].length; j++) {
                 let brickLifes = this.bricks.bricks[i][j].lifes;
-		if (brickLifes !== 0) {
-		    if (this.ball.dir == BallDirs.LEFT + BallDirs.UP) {
-			if (this.isPointInRect(this.ball.x - this.ball.speed, this.ball.y - 0, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
-			    this.ball.x = this.bricks.bricks[i][j].x + this.bricks.bricks[i][j].width + this.ball.speed;
-			    this.ball.dir = this.ball.dir - BallDirs.LEFT + BallDirs.RIGHT;
+                if (brickLifes !== 0) {
+                    if (this.ball.dir == BallDirs.LEFT + BallDirs.UP) {
+                        if (this.isPointInRect(this.ball.x - this.ball.speed, this.ball.y - 0, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
+                            this.ball.x = this.bricks.bricks[i][j].x + this.bricks.bricks[i][j].width + this.ball.speed;
+                            this.ball.dir = this.ball.dir - BallDirs.LEFT + BallDirs.RIGHT;
                             if (brickLifes > 0) {
-			        this.bricks.bricks[i][j].lifes--;
-			        this.score += BRICK_SCORE;
+                                this.bricks.bricks[i][j].lifes--;
+                                this.score += BRICK_SCORE;
                             }
-			    return;
-			}
-			if (this.isPointInRect(this.ball.x - 0, this.ball.y - this.ball.speed, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
-			    this.ball.y = this.bricks.bricks[i][j].y + this.bricks.bricks[i][j].height + this.ball.speed;
-			    this.ball.dir = this.ball.dir - BallDirs.UP + BallDirs.DOWN;
+                            return;
+                        }
+                        if (this.isPointInRect(this.ball.x - 0, this.ball.y - this.ball.speed, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
+                            this.ball.y = this.bricks.bricks[i][j].y + this.bricks.bricks[i][j].height + this.ball.speed;
+                            this.ball.dir = this.ball.dir - BallDirs.UP + BallDirs.DOWN;
                             if (brickLifes > 0) {
-			        this.bricks.bricks[i][j].lifes--;
-			        this.score += BRICK_SCORE;
+                                this.bricks.bricks[i][j].lifes--;
+                                this.score += BRICK_SCORE;
                             }
-			    return;
-			}
-		    } else if (this.ball.dir == BallDirs.LEFT + BallDirs.DOWN) {
-			if (this.isPointInRect(this.ball.x - this.ball.speed, this.ball.y + 0, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
-			    this.ball.x = this.bricks.bricks[i][j].x + this.bricks.bricks[i][j].width + this.ball.speed;
-			    this.ball.dir = this.ball.dir - BallDirs.LEFT + BallDirs.RIGHT;
+                            return;
+                        }
+                    } else if (this.ball.dir == BallDirs.LEFT + BallDirs.DOWN) {
+                        if (this.isPointInRect(this.ball.x - this.ball.speed, this.ball.y + 0, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
+                            this.ball.x = this.bricks.bricks[i][j].x + this.bricks.bricks[i][j].width + this.ball.speed;
+                            this.ball.dir = this.ball.dir - BallDirs.LEFT + BallDirs.RIGHT;
                             if (brickLifes > 0) {
-			        this.bricks.bricks[i][j].lifes--;
-			        this.score += BRICK_SCORE;
+                                this.bricks.bricks[i][j].lifes--;
+                                this.score += BRICK_SCORE;
                             }
-			    return;
-			}
-			if (this.isPointInRect(this.ball.x - 0, this.ball.y + this.ball.speed, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
-			    this.ball.y = this.bricks.bricks[i][j].y - this.ball.speed;
-			    this.ball.dir = this.ball.dir - BallDirs.DOWN + BallDirs.UP;
+                            return;
+                        }
+                        if (this.isPointInRect(this.ball.x - 0, this.ball.y + this.ball.speed, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
+                            this.ball.y = this.bricks.bricks[i][j].y - this.ball.speed;
+                            this.ball.dir = this.ball.dir - BallDirs.DOWN + BallDirs.UP;
                             if (brickLifes > 0) {
-			        this.bricks.bricks[i][j].lifes--;
-			        this.score += BRICK_SCORE;
+                                this.bricks.bricks[i][j].lifes--;
+                                this.score += BRICK_SCORE;
                             }
-			    return;
-			}
-		    } else if (this.ball.dir == BallDirs.RIGHT + BallDirs.UP) {
-			if (this.isPointInRect(this.ball.x + this.ball.speed, this.ball.y - 0, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
-			    this.ball.x = this.bricks.bricks[i][j].x - this.ball.speed;
-			    this.ball.dir = this.ball.dir - BallDirs.RIGHT + BallDirs.LEFT;
+                            return;
+                        }
+                    } else if (this.ball.dir == BallDirs.RIGHT + BallDirs.UP) {
+                        if (this.isPointInRect(this.ball.x + this.ball.speed, this.ball.y - 0, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
+                            this.ball.x = this.bricks.bricks[i][j].x - this.ball.speed;
+                            this.ball.dir = this.ball.dir - BallDirs.RIGHT + BallDirs.LEFT;
                             if (brickLifes > 0) {
-			        this.bricks.bricks[i][j].lifes--;
-			        this.score += BRICK_SCORE;
+                                this.bricks.bricks[i][j].lifes--;
+                                this.score += BRICK_SCORE;
                             }
-			    return;
-			}
-			if (this.isPointInRect(this.ball.x + 0, this.ball.y - this.ball.speed, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
-			    this.ball.y = this.bricks.bricks[i][j].y + this.bricks.bricks[i][j].height + this.ball.speed;
-			    this.ball.dir = this.ball.dir - BallDirs.UP + BallDirs.DOWN;
+                            return;
+                        }
+                        if (this.isPointInRect(this.ball.x + 0, this.ball.y - this.ball.speed, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
+                            this.ball.y = this.bricks.bricks[i][j].y + this.bricks.bricks[i][j].height + this.ball.speed;
+                            this.ball.dir = this.ball.dir - BallDirs.UP + BallDirs.DOWN;
                             if (brickLifes > 0) {
-			        this.bricks.bricks[i][j].lifes--;
-			        this.score += BRICK_SCORE;
+                                this.bricks.bricks[i][j].lifes--;
+                                this.score += BRICK_SCORE;
                             }
-			    return;
-			}
-		    } else if (this.ball.dir == BallDirs.RIGHT + BallDirs.DOWN) {
-			if (this.isPointInRect(this.ball.x + this.ball.speed, this.ball.y + 0, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
-			    this.ball.x = this.bricks.bricks[i][j].x - this.ball.speed;
-			    this.ball.dir = this.ball.dir - BallDirs.RIGHT + BallDirs.LEFT;
+                            return;
+                        }
+                    } else if (this.ball.dir == BallDirs.RIGHT + BallDirs.DOWN) {
+                        if (this.isPointInRect(this.ball.x + this.ball.speed, this.ball.y + 0, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
+                            this.ball.x = this.bricks.bricks[i][j].x - this.ball.speed;
+                            this.ball.dir = this.ball.dir - BallDirs.RIGHT + BallDirs.LEFT;
                             if (brickLifes > 0) {
-			        this.bricks.bricks[i][j].lifes--;
-			        this.score += BRICK_SCORE;
+                                this.bricks.bricks[i][j].lifes--;
+                                this.score += BRICK_SCORE;
                             }
-			    return;
-			}
-			if (this.isPointInRect(this.ball.x + 0, this.ball.y + this.ball.speed, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
-			    this.ball.y = this.bricks.bricks[i][j].y - this.ball.speed;
-			    this.ball.dir = this.ball.dir - BallDirs.DOWN + BallDirs.UP;
+                            return;
+                        }
+                        if (this.isPointInRect(this.ball.x + 0, this.ball.y + this.ball.speed, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
+                            this.ball.y = this.bricks.bricks[i][j].y - this.ball.speed;
+                            this.ball.dir = this.ball.dir - BallDirs.DOWN + BallDirs.UP;
                             if (brickLifes > 0) {
-			        this.bricks.bricks[i][j].lifes--;
-			        this.score += BRICK_SCORE;
+                                this.bricks.bricks[i][j].lifes--;
+                                this.score += BRICK_SCORE;
                             }
-			    return;
-			}
-		    }
-		}
-	    }
-	}
+                            return;
+                        }
+                    }
+                }
+            }
+        }
 
-	let levelUp = true;
-	for (var i = 0; i < this.bricks.bricks.length; i++) {
+        let levelUp = true;
+        for (var i = 0; i < this.bricks.bricks.length; i++) {
             if (!levelUp) break;
-	    for (var j = 0; j < this.bricks.bricks[i].length; j++) {
+            for (var j = 0; j < this.bricks.bricks[i].length; j++) {
                 if (this.bricks.bricks[i][j].lifes > 0) {
                     levelUp = false;
                     break;
                 }
-	    }
-	}
-	if (levelUp) {
+            }
+        }
+        if (levelUp) {
             window.highscores.setScore(this.score);
-	    this.ball.dir = BallDirs.NONE;
+            this.ball.dir = BallDirs.NONE;
             localStorage.lifes = ++this.lifes;
             localStorage.level = ++this.level;
             localStorage.score = this.score;
-	    this.initLevel(this.level);
-	}
+            this.initLevel(this.level);
+        }
     };
 
 
     this.isPointInRect = function(x, y, rect_x, rect_y, rect_width, rect_height) {
-	if ((x > rect_x && x < rect_x + rect_width) &&
-	    (y > rect_y && y < rect_y + rect_height))
-	    return true;
-	return false;
+        if ((x > rect_x && x < rect_x + rect_width) &&
+            (y > rect_y && y < rect_y + rect_height))
+            return true;
+        return false;
     };
 
     this.isBallIntersectBrick = function(i, j) {
-	if ((this.ball.x + this.ball.radius > this.bricks.bricks[i][j].x &&
-	     this.ball.x - this.ball.radius < this.bricks.bricks[i][j].x + this.bricks.bricks[i][j].width) &&
-	    (this.ball.y + this.ball.radius > this.bricks.bricks[i][j].y &&
-	     this.ball.y - this.ball.radius < this.bricks.bricks[i][j].y + this.bricks.bricks[i][j].height))
-	    return true;
-	return false;
+        if ((this.ball.x + this.ball.radius > this.bricks.bricks[i][j].x &&
+             this.ball.x - this.ball.radius < this.bricks.bricks[i][j].x + this.bricks.bricks[i][j].width) &&
+            (this.ball.y + this.ball.radius > this.bricks.bricks[i][j].y &&
+             this.ball.y - this.ball.radius < this.bricks.bricks[i][j].y + this.bricks.bricks[i][j].height))
+            return true;
+        return false;
     };
 
     this.render = function() {
-	context.clearRect(0, 0, canvas.width, canvas.height);
-	this.update();
-	this.draw();
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        this.update();
+        this.draw();
     };
 
     this.togglePause = function() {
-	this.gamePaused = !this.gamePaused;
+        this.gamePaused = !this.gamePaused;
     };
 
     this.movePaddleLeft = function() {
-	if (this.paddle.x > 0)
-	    this.paddle.x -= 10 * PADDLE_SPEED;
+        if (this.paddle.x > 0)
+            this.paddle.x -= 10 * PADDLE_SPEED;
     };
 
     this.movePaddleRight = function() {
-	if (this.paddle.x < canvas.width - this.paddle.width)
-	    this.paddle.x += 10 * PADDLE_SPEED;
+        if (this.paddle.x < canvas.width - this.paddle.width)
+            this.paddle.x += 10 * PADDLE_SPEED;
     };
 
     this.setPaddlePos = function(x) {
-	if (this.gamePaused || this.gameOver) return;
-	if (x < 0) x = 0;
-	if (x > canvas.width - this.paddle.width) x = canvas.width - this.paddle.width;
-	this.paddle.x = x;
+        if (this.gamePaused || this.gameOver) return;
+        if (x < 0) x = 0;
+        if (x > canvas.width - this.paddle.width) x = canvas.width - this.paddle.width;
+        this.paddle.x = x;
     };
 
     this.startGame = function() {
-	if (this.gamePaused) return;
-	if (this.ball.dir == BallDirs.NONE) {
-	    this.ball.dir = BallDirs.RIGHT + BallDirs.UP;
-	}
+        if (this.gamePaused) return;
+        if (this.ball.dir == BallDirs.NONE) {
+            this.ball.dir = BallDirs.RIGHT + BallDirs.UP;
+        }
     };
 
     this.drawScoreboard = function() {
@@ -458,7 +458,7 @@ function ArkanoidGame(canvas, context) {
         if (board.length === 0) return;
 
         context.fillStyle = 'rgb(255,255,0)';
-	context.font = 'bold 20px Arial';
+        context.font = 'bold 20px Arial';
         context.fillText('Scoreboard', canvas.width / 2 - 50, (canvas.height / 2)-20);
         for (let i = 0; i < board.length; i++) {
             context.fillText(board[i].pos + ". " + board[i].name + " " + board[i].score, canvas.width / 2 - 50, (canvas.height / 2)+i*20);
@@ -483,12 +483,12 @@ function checkCanvasIsSupported() {
                      document.body.clientHeight)-100;
     canvas.style.cursor = "none";
     if (canvas.getContext) {
-	arkanoidGame = new ArkanoidGame(canvas, canvas.getContext('2d'));
-	arkanoidGame.init();
+        arkanoidGame = new ArkanoidGame(canvas, canvas.getContext('2d'));
+        arkanoidGame.init();
 
-	setInterval(render, 1000 / 60);
+        setInterval(render, 1000 / 60);
     } else {
-	document.getElementById("body").innerHTML = "Sorry, but your browser doesn't support a canvas.";
+        document.getElementById("body").innerHTML = "Sorry, but your browser doesn't support a canvas.";
     }
 }
 
