@@ -13,7 +13,9 @@ let BricksTypes = {
     DEFAULT: 1,
 };
 let KeyCodes = {
-    SPACE : 32
+    SPACE: 32,
+    LEFT: 37,
+    RIGHT: 39,
 };
 
 window.addEventListener("load", () => {
@@ -32,9 +34,10 @@ window.addEventListener("load", () => {
         }
 
         document.onclick = function(){
-            arkanoidGame.startGame();
             if (arkanoidGame.gameOver) {
                 document.location.reload(true);
+            } else {
+                arkanoidGame.startGame();
             }
         }
 
@@ -47,7 +50,19 @@ window.addEventListener("load", () => {
             }
             switch (keyCode) {
             case KeyCodes.SPACE:
-                arkanoidGame.togglePause();
+                if (arkanoidGame.ball.dir === BallDirs.NONE) {
+                    arkanoidGame.startGame();
+                } else if (arkanoidGame.gameOver) {
+                    document.location.reload(true);
+                } else {
+                    arkanoidGame.togglePause();
+                }
+                break;
+            case KeyCodes.LEFT:
+                arkanoidGame.movePaddleLeft();
+                break;
+            case KeyCodes.RIGHT:
+                arkanoidGame.movePaddleRight();
                 break;
             default:
                 break;
@@ -103,7 +118,7 @@ function ArkanoidGame(canvas, context) {
 
     let PADDLE_WIDTH = 60,
         PADDLE_HEIGHT = 15,
-        PADDLE_SPEED = 1,
+        PADDLE_SPEED = 3,
         BALL_RADIUS = 5,
         BALL_DEFAULT_SPEED = 5,
         BALL_MAX_SPEED = 8,
@@ -429,13 +444,11 @@ function ArkanoidGame(canvas, context) {
     };
 
     this.movePaddleLeft = function() {
-        if (this.paddle.x > 0)
-            this.paddle.x -= 10 * PADDLE_SPEED;
+        this.setPaddlePos(this.paddle.x - 10 * PADDLE_SPEED);
     };
 
     this.movePaddleRight = function() {
-        if (this.paddle.x < canvas.width - this.paddle.width)
-            this.paddle.x += 10 * PADDLE_SPEED;
+        this.setPaddlePos(this.paddle.x + 10 * PADDLE_SPEED);
     };
 
     this.setPaddlePos = function(x) {
