@@ -128,10 +128,10 @@ function ArkanoidGame(canvas, context) {
         BALL_MAX_SPEED = 8,
         BRICK_WIDTH = 81,
         BRICK_HEIGHT = 35,
-        BRICK_SCORE = 1;
+        BRICK_SCORE = 5;
 
     this.level = 0;
-    this.lifes = 2;
+    this.lifes = 3;
     this.score = 0;
     this.paddle = new Paddle(canvas.width / 2 - PADDLE_WIDTH / 2, canvas.height - 20, PADDLE_WIDTH, PADDLE_HEIGHT);
     this.ball = new Ball(canvas.width / 2, canvas.height / 2, BALL_RADIUS, BallDirs.NONE, BALL_DEFAULT_SPEED);
@@ -503,17 +503,30 @@ function ArkanoidGame(canvas, context) {
     };
 
     this.movePaddleLeft = function() {
-        this.setPaddlePos(this.paddle.x - 10 * PADDLE_SPEED);
+        if (this.gamePaused || this.gameOver) return;
+        let x = this.paddle.x - 10 * PADDLE_SPEED;
+        if (x < 0) x = 0;
+        if (x > canvas.width - this.paddle.width) x = canvas.width - this.paddle.width;
+        this.paddle.x = x;
     };
 
     this.movePaddleRight = function() {
-        this.setPaddlePos(this.paddle.x + 10 * PADDLE_SPEED);
+        if (this.gamePaused || this.gameOver) return;
+        let x = this.paddle.x + 10 * PADDLE_SPEED;
+        if (x < 0) x = 0;
+        if (x > canvas.width - this.paddle.width) x = canvas.width - this.paddle.width;
+        this.paddle.x = x;
     };
 
     this.setPaddlePos = function(x) {
         if (this.gamePaused || this.gameOver) return;
-        if (x < 0) x = 0;
-        if (x > canvas.width - this.paddle.width) x = canvas.width - this.paddle.width;
+        if (x < this.paddle.width/2) {
+            x = 0;
+        } else if (x > canvas.width - this.paddle.width/2) {
+            x = canvas.width - this.paddle.width;
+        } else {
+            x -= this.paddle.width/2 + 5;
+        }
         this.paddle.x = x;
     };
 
