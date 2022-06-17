@@ -78,6 +78,10 @@ var loadImages = function ( ) {
    imgBall = new Image(); imgBall.src = "./images/ball.png";
 }
 
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 function Paddle(x, y, width, height) {
     this.x = x;
     this.y = y;
@@ -169,7 +173,9 @@ function ArkanoidGame(canvas, context) {
             break;
 
         default:
-            this.bricks = new Bricks(6, 12, brick_width, BRICK_HEIGHT);
+            let rows = level < 6? getRandomInt(5, 7) : getRandomInt(7, 12);
+            let max_empty = level < 6? 6 : 15;
+            this.bricks = new Bricks(6, rows, brick_width, BRICK_HEIGHT);
             let empty = 0;
             let permanent = 0;
             let permanent2 = 0;
@@ -178,18 +184,18 @@ function ArkanoidGame(canvas, context) {
                     let lifes = 0;
                     if (i === this.bricks.bricks.length-1) {
                         if (permanent2 < 3) {
-                            lifes = -1 * (parseInt(Math.random()*10) % 2);
+                            lifes = getRandomInt(-1, 0);
                             if (lifes === -1) permanent2++;
                         }
                     } else if (i !== this.bricks.bricks.length-2) {
-                        lifes = parseInt(Math.random()*10) % 7 * (parseInt(Math.random()*10) % 2);
+                        lifes = getRandomInt(0, 6) * getRandomInt(0, 1);
                         if (lifes === 0) {
-                            if (empty++ > 15) {
-                                if (parseInt(Math.random()*10) % 2 && permanent < 1) {
+                            if (empty++ >= max_empty) {
+                                if (getRandomInt(0, 1) && permanent < 1) {
                                     lifes = -1;
                                     permanent++;
                                 } else {
-                                    lifes = (parseInt(Math.random()*10) % 6) + 1;
+                                    lifes = getRandomInt(1, 6);
                                 }
                             }
                         }
