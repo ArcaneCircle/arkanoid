@@ -156,20 +156,73 @@ function ArkanoidGame(canvas, context) {
             this.bricks = new Bricks(6, 2, brick_width, BRICK_HEIGHT);
             for (var i = 0; i < this.bricks.bricks.length; i++) {
                 for (var j = 0; j < this.bricks.bricks[i].length; j++) {
-                    this.bricks.bricks[i][j].lifes = BricksTypes.DEFAULT;
+                    this.bricks.bricks[i][j].lifes = BricksTypes.DEFAULT + (j+i)%2;
                 }
             }
             break;
 
         case 1:
-            this.bricks = new Bricks(6, 3, brick_width, BRICK_HEIGHT);
+            this.bricks = new Bricks(6, 4, brick_width, BRICK_HEIGHT);
             for (var i = 0; i < this.bricks.bricks.length; i++) {
                 for (var j = 0; j < this.bricks.bricks[i].length; j++) {
-                    this.bricks.bricks[i][j].lifes = BricksTypes.DEFAULT + i;
+                    this.bricks.bricks[i][j].lifes = BricksTypes.DEFAULT * i;
                 }
             }
             this.bricks.bricks[2][1].lifes = -1;
             this.bricks.bricks[2][4].lifes = -1;
+            break;
+
+        case 4:
+            this.bricks = new Bricks(6, 8, brick_width, BRICK_HEIGHT);
+            for (var i = this.bricks.bricks.length-1; i >= 0 ; i--) {
+                for (var j = 0; j < this.bricks.bricks[i].length; j++) {
+                    let lifes = 0;
+                    if (j<5) {
+                         if (i === 4) {
+                            lifes = BricksTypes.DEFAULT + j%2*4 +1;
+                        } else if (i === 6 && 0 <j && j < this.bricks.bricks[i].length-2) {
+                            lifes = 0;
+                        } else if (i > 2) {
+                            lifes = 2;
+                        } else if (i === 2) {
+                            lifes = BricksTypes.DEFAULT + j%2*4;
+                        }
+                    }
+                    this.bricks.bricks[i][j].lifes = lifes;
+                }
+            }
+            break;
+
+        case 6:
+            this.bricks = new Bricks(6, 12, brick_width, BRICK_HEIGHT);
+            for (var i = this.bricks.bricks.length-1; i >= 0 ; i--) {
+                for (var j = 0; j < this.bricks.bricks[i].length; j++) {
+                    let lifes = 0;
+                    if (-1 < i-j && i-j < 6 && j !== this.bricks.bricks[i].length-1) {
+                        lifes = BricksTypes.DEFAULT + i - j;
+                    } else if (j === 0) {
+                        lifes = -1;
+                    }
+                    this.bricks.bricks[i][j].lifes = lifes;
+                }
+            }
+            break;
+
+        case 8:
+            this.bricks = new Bricks(6, 12, brick_width, BRICK_HEIGHT);
+            for (var i = this.bricks.bricks.length-1; i >= 0 ; i--) {
+                for (var j = 0; j < this.bricks.bricks[i].length; j++) {
+                    let lifes = 0;
+                    if (i === this.bricks.bricks.length-2 ) {
+                        lifes = (j !== this.bricks.bricks[i].length-1)? -1: 1;
+                    } else if (i > this.bricks.bricks.length-2 ) {
+                        lifes = 0;
+                    } else if (2 < i-j && j !== this.bricks.bricks[i].length-1) {
+                        lifes = BricksTypes.DEFAULT + j+1;
+                    }
+                    this.bricks.bricks[i][j].lifes = lifes;
+                }
+            }
             break;
 
         default:
