@@ -5,6 +5,7 @@
     "dist/assets",
     "dist/index.html",
     "images",
+    "sounds",
     "icon.png",
     "manifest.toml"
   ],

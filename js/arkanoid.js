@@ -1,7 +1,10 @@
 let arkanoidGame,
     imgBall,
     imgPaddle,
-    imgBricks;
+    imgBricks,
+    sfxBounce,
+    sfxHit,
+    sfxWin;
 let BallDirs = {
     NONE : 0,
     LEFT : 1,
@@ -18,68 +21,44 @@ let KeyCodes = {
     RIGHT: 39,
 };
 
-window.addEventListener("load", () => {
-    window.highscores.init("Arkanoid").then(() =>{
-        checkCanvasIsSupported();
-        // Preload images
-        loadImages();
+function loadAssets( ) {
+    imgBricks = new Image(); imgBricks.src = "./images/bricks.png";
+    imgPaddle = new Image(); imgPaddle.src = "./images/paddle.png";
+    imgBall = new Image(); imgBall.src = "./images/ball.png";
 
-        document.onmousemove = function(event) {
-            event.preventDefault()
-            arkanoidGame.setPaddlePos(event.pageX);
-        }
-
-        document.ontouchmove = function(event) {
-            arkanoidGame.setPaddlePos(event.touches[0].clientX);
-        }
-
-        document.onclick = function(){
-            if (arkanoidGame.gameOver) {
-                document.location.reload(true);
-            } else {
-                arkanoidGame.startGame();
-            }
-        }
-
-        document.onkeydown = function(event) {
-            var keyCode;
-            if (event == null) {
-                keyCode = window.event.keyCode;
-            } else {
-                keyCode = event.keyCode;
-            }
-            switch (keyCode) {
-            case KeyCodes.SPACE:
-                if (arkanoidGame.ball.dir === BallDirs.NONE) {
-                    arkanoidGame.startGame();
-                } else if (arkanoidGame.gameOver) {
-                    document.location.reload(true);
-                } else {
-                    arkanoidGame.togglePause();
-                }
-                break;
-            case KeyCodes.LEFT:
-                arkanoidGame.movePaddleLeft();
-                break;
-            case KeyCodes.RIGHT:
-                arkanoidGame.movePaddleRight();
-                break;
-            default:
-                break;
-            }
-        }
-    });
-});
-
-// Function to preload all images
-var loadImages = function ( ) {
-   imgBricks = new Image(); imgBricks.src = "./images/bricks.png";
-   imgPaddle = new Image(); imgPaddle.src = "./images/paddle.png";
-   imgBall = new Image(); imgBall.src = "./images/ball.png";
+    //load audio
+    sfxBounce = new Sound("sounds/bounce.mp3");
+    sfxWin = new Sound("sounds/victory.mp3");
+    sfxHit = new Sound("sounds/hit.mp3");
 }
 
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function Sound(src) {
+   this.sfx = new Audio (src);
+   this.sfx.addEventListener('timeupdate', function(){
+      if ( !this.loop ) return;
+
+      var buffer = 0.36;
+      if(this.currentTime > this.duration - buffer){
+         this.currentTime = 0
+         this.play()
+      }}, false);
+
+   this.play = function () {
+      this.sfx.currentTime = 0;
+      this.sfx.play();
+      this.sfx.loop = false;
+   }
+
+   this.loop = function () {
+      this.sfx.play();
+      this.sfx.loop = true;
+   }
+
+   this.stop = function () { this.sfx.pause(); }
 }
 
 function Paddle(x, y, width, height) {
@@ -289,6 +268,7 @@ function ArkanoidGame(canvas, context) {
 
         if (this.ball.y + this.ball.radius > canvas.height) {
             // lost one life
+            sfxHit.play();
             window.navigator.vibrate(100);
             localStorage.lifes = --this.lifes;
             this.ball.speed = BALL_DEFAULT_SPEED;
@@ -311,80 +291,88 @@ function ArkanoidGame(canvas, context) {
         // bounces
         for (var i = 0; i < this.bricks.bricks.length; i++) {
             for (var j = 0; j < this.bricks.bricks[i].length; j++) {
-                let brickLifes = this.bricks.bricks[i][j].lifes;
-                if (brickLifes !== 0) {
+                let brick = this.bricks.bricks[i][j];
+                if (brick.lifes !== 0) {
                     if (this.ball.dir == BallDirs.LEFT + BallDirs.UP) {
-                        if (this.isPointInRect(this.ball.x - this.ball.speed, this.ball.y - 0, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
-                            this.ball.x = this.bricks.bricks[i][j].x + this.bricks.bricks[i][j].width + this.ball.speed;
+                        if (this.isPointInRect(this.ball.x - this.ball.speed, this.ball.y - 0, brick.x, brick.y, brick.width, brick.height)) {
+                            sfxBounce.play();
+                            this.ball.x = brick.x + brick.width + this.ball.speed;
                             this.ball.dir = this.ball.dir - BallDirs.LEFT + BallDirs.RIGHT;
-                            if (brickLifes > 0) {
-                                this.bricks.bricks[i][j].lifes--;
+                            if (brick.lifes > 0) {
+                                brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
                             return;
                         }
-                        if (this.isPointInRect(this.ball.x - 0, this.ball.y - this.ball.speed, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
-                            this.ball.y = this.bricks.bricks[i][j].y + this.bricks.bricks[i][j].height + this.ball.speed;
+                        if (this.isPointInRect(this.ball.x - 0, this.ball.y - this.ball.speed, brick.x, brick.y, brick.width, brick.height)) {
+                            sfxBounce.play();
+                            this.ball.y = brick.y + brick.height + this.ball.speed;
                             this.ball.dir = this.ball.dir - BallDirs.UP + BallDirs.DOWN;
-                            if (brickLifes > 0) {
-                                this.bricks.bricks[i][j].lifes--;
+                            if (brick.lifes > 0) {
+                                brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
                             return;
                         }
                     } else if (this.ball.dir == BallDirs.LEFT + BallDirs.DOWN) {
-                        if (this.isPointInRect(this.ball.x - this.ball.speed, this.ball.y + 0, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
-                            this.ball.x = this.bricks.bricks[i][j].x + this.bricks.bricks[i][j].width + this.ball.speed;
+                        if (this.isPointInRect(this.ball.x - this.ball.speed, this.ball.y + 0, brick.x, brick.y, brick.width, brick.height)) {
+                            sfxBounce.play();
+                            this.ball.x = brick.x + brick.width + this.ball.speed;
                             this.ball.dir = this.ball.dir - BallDirs.LEFT + BallDirs.RIGHT;
-                            if (brickLifes > 0) {
-                                this.bricks.bricks[i][j].lifes--;
+                            if (brick.lifes > 0) {
+                                brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
                             return;
                         }
-                        if (this.isPointInRect(this.ball.x - 0, this.ball.y + this.ball.speed, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
-                            this.ball.y = this.bricks.bricks[i][j].y - this.ball.speed;
+                        if (this.isPointInRect(this.ball.x - 0, this.ball.y + this.ball.speed, brick.x, brick.y, brick.width, brick.height)) {
+                            sfxBounce.play();
+                            this.ball.y = brick.y - this.ball.speed;
                             this.ball.dir = this.ball.dir - BallDirs.DOWN + BallDirs.UP;
-                            if (brickLifes > 0) {
-                                this.bricks.bricks[i][j].lifes--;
+                            if (brick.lifes > 0) {
+                                brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
                             return;
                         }
                     } else if (this.ball.dir == BallDirs.RIGHT + BallDirs.UP) {
-                        if (this.isPointInRect(this.ball.x + this.ball.speed, this.ball.y - 0, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
-                            this.ball.x = this.bricks.bricks[i][j].x - this.ball.speed;
+                        if (this.isPointInRect(this.ball.x + this.ball.speed, this.ball.y - 0, brick.x, brick.y, brick.width, brick.height)) {
+                            sfxBounce.play();
+                            this.ball.x = brick.x - this.ball.speed;
                             this.ball.dir = this.ball.dir - BallDirs.RIGHT + BallDirs.LEFT;
-                            if (brickLifes > 0) {
-                                this.bricks.bricks[i][j].lifes--;
+                            if (brick.lifes > 0) {
+                                brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
                             return;
                         }
-                        if (this.isPointInRect(this.ball.x + 0, this.ball.y - this.ball.speed, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
-                            this.ball.y = this.bricks.bricks[i][j].y + this.bricks.bricks[i][j].height + this.ball.speed;
+                        if (this.isPointInRect(this.ball.x + 0, this.ball.y - this.ball.speed, brick.x, brick.y, brick.width, brick.height)) {
+                            sfxBounce.play();
+                            this.ball.y = brick.y + brick.height + this.ball.speed;
                             this.ball.dir = this.ball.dir - BallDirs.UP + BallDirs.DOWN;
-                            if (brickLifes > 0) {
-                                this.bricks.bricks[i][j].lifes--;
+                            if (brick.lifes > 0) {
+                                brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
                             return;
                         }
                     } else if (this.ball.dir == BallDirs.RIGHT + BallDirs.DOWN) {
-                        if (this.isPointInRect(this.ball.x + this.ball.speed, this.ball.y + 0, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
-                            this.ball.x = this.bricks.bricks[i][j].x - this.ball.speed;
+                        if (this.isPointInRect(this.ball.x + this.ball.speed, this.ball.y + 0, brick.x, brick.y, brick.width, brick.height)) {
+                            sfxBounce.play();
+                            this.ball.x = brick.x - this.ball.speed;
                             this.ball.dir = this.ball.dir - BallDirs.RIGHT + BallDirs.LEFT;
-                            if (brickLifes > 0) {
-                                this.bricks.bricks[i][j].lifes--;
+                            if (brick.lifes > 0) {
+                                brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
                             return;
                         }
-                        if (this.isPointInRect(this.ball.x + 0, this.ball.y + this.ball.speed, this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y, this.bricks.bricks[i][j].width, this.bricks.bricks[i][j].height)) {
-                            this.ball.y = this.bricks.bricks[i][j].y - this.ball.speed;
+                        if (this.isPointInRect(this.ball.x + 0, this.ball.y + this.ball.speed, brick.x, brick.y, brick.width, brick.height)) {
+                            sfxBounce.play();
+                            this.ball.y = brick.y - this.ball.speed;
                             this.ball.dir = this.ball.dir - BallDirs.DOWN + BallDirs.UP;
-                            if (brickLifes > 0) {
-                                this.bricks.bricks[i][j].lifes--;
+                            if (brick.lifes > 0) {
+                                brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
                             return;
@@ -405,6 +393,7 @@ function ArkanoidGame(canvas, context) {
             }
         }
         if (levelUp) {
+            sfxWin.play();
             window.highscores.setScore(this.score);
             this.ball.dir = BallDirs.NONE;
             this.ball.speed = BALL_DEFAULT_SPEED;
@@ -517,3 +506,57 @@ function checkCanvasIsSupported() {
     }
 }
 
+
+// Preload assets
+loadAssets();
+
+window.addEventListener("load", () => {
+    window.highscores.init("Arkanoid").then(() =>{
+        checkCanvasIsSupported();
+
+        document.onmousemove = function(event) {
+            event.preventDefault()
+            arkanoidGame.setPaddlePos(event.pageX);
+        }
+
+        document.ontouchmove = function(event) {
+            arkanoidGame.setPaddlePos(event.touches[0].clientX);
+        }
+
+        document.onclick = function(){
+            if (arkanoidGame.gameOver) {
+                document.location.reload(true);
+            } else {
+                arkanoidGame.startGame();
+            }
+        }
+
+        document.onkeydown = function(event) {
+            var keyCode;
+            if (event == null) {
+                keyCode = window.event.keyCode;
+            } else {
+                keyCode = event.keyCode;
+            }
+            switch (keyCode) {
+            case KeyCodes.SPACE:
+                if (arkanoidGame.ball.dir === BallDirs.NONE) {
+                    arkanoidGame.startGame();
+                } else if (arkanoidGame.gameOver) {
+                    document.location.reload(true);
+                } else {
+                    arkanoidGame.togglePause();
+                }
+                break;
+            case KeyCodes.LEFT:
+                arkanoidGame.movePaddleLeft();
+                break;
+            case KeyCodes.RIGHT:
+                arkanoidGame.movePaddleRight();
+                break;
+            default:
+                break;
+            }
+        }
+    });
+});
