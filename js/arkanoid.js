@@ -105,12 +105,12 @@ function Brick(x, y, width, height, type) {
     this.lifes = type;
 }
 
-function Bricks(hor_num, vert_num, brick_width, brick_height) {
+function Bricks(hor_num, vert_num, brick_width, brick_height, level) {
     this.bricks = new Array();
     for (var i = 0; i < vert_num; i++) {
         this.bricks[i] = new Array();
         for (var j = 0; j < hor_num; j++) {
-            this.bricks[i][j] = new Brick(j * brick_width, i * brick_height, brick_width, brick_height, BricksTypes.DEFAULT);
+            this.bricks[i][j] = new Brick(j * brick_width, i * brick_height, brick_width, brick_height, level? level[i][j]: BricksTypes.DEFAULT);
         }
     }
 }
@@ -151,85 +151,16 @@ function ArkanoidGame(canvas, context) {
     };
 
     this.initLevel = function(level) {
-        let brick_width = Math.round(canvas.width/6);
-        switch (level) {
-        case 0:
-            this.bricks = new Bricks(6, 2, brick_width, BRICK_HEIGHT);
-            for (var i = 0; i < this.bricks.bricks.length; i++) {
-                for (var j = 0; j < this.bricks.bricks[i].length; j++) {
-                    this.bricks.bricks[i][j].lifes = BricksTypes.DEFAULT + (j+i)%2;
-                }
-            }
-            break;
-
-        case 1:
-            this.bricks = new Bricks(6, 4, brick_width, BRICK_HEIGHT);
-            for (var i = 0; i < this.bricks.bricks.length; i++) {
-                for (var j = 0; j < this.bricks.bricks[i].length; j++) {
-                    this.bricks.bricks[i][j].lifes = BricksTypes.DEFAULT * i;
-                }
-            }
-            this.bricks.bricks[2][1].lifes = -1;
-            this.bricks.bricks[2][4].lifes = -1;
-            break;
-
-        case 4:
-            this.bricks = new Bricks(6, 8, brick_width, BRICK_HEIGHT);
-            for (var i = this.bricks.bricks.length-1; i >= 0 ; i--) {
-                for (var j = 0; j < this.bricks.bricks[i].length; j++) {
-                    let lifes = 0;
-                    if (j<5) {
-                         if (i === 4) {
-                            lifes = BricksTypes.DEFAULT + j%2*4 +1;
-                        } else if (i === 6 && 0 <j && j < this.bricks.bricks[i].length-2) {
-                            lifes = 0;
-                        } else if (i > 2) {
-                            lifes = 2;
-                        } else if (i === 2) {
-                            lifes = BricksTypes.DEFAULT + j%2*4;
-                        }
-                    }
-                    this.bricks.bricks[i][j].lifes = lifes;
-                }
-            }
-            break;
-
-        case 6:
-            this.bricks = new Bricks(6, 12, brick_width, BRICK_HEIGHT);
-            for (var i = this.bricks.bricks.length-1; i >= 0 ; i--) {
-                for (var j = 0; j < this.bricks.bricks[i].length; j++) {
-                    let lifes = 0;
-                    if (-1 < i-j && i-j < 6 && j !== this.bricks.bricks[i].length-1) {
-                        lifes = BricksTypes.DEFAULT + i - j;
-                    } else if (j === 0) {
-                        lifes = -1;
-                    }
-                    this.bricks.bricks[i][j].lifes = lifes;
-                }
-            }
-            break;
-
-        case 8:
-            this.bricks = new Bricks(6, 12, brick_width, BRICK_HEIGHT);
-            for (var i = this.bricks.bricks.length-1; i >= 0 ; i--) {
-                for (var j = 0; j < this.bricks.bricks[i].length; j++) {
-                    let lifes = 0;
-                    if (i === this.bricks.bricks.length-2 ) {
-                        lifes = (j !== this.bricks.bricks[i].length-1)? -1: 1;
-                    } else if (i > this.bricks.bricks.length-2 ) {
-                        lifes = 0;
-                    } else if (2 < i-j && j !== this.bricks.bricks[i].length-1) {
-                        lifes = BricksTypes.DEFAULT + j+1;
-                    }
-                    this.bricks.bricks[i][j].lifes = lifes;
-                }
-            }
-            break;
-
-        default:
-            let rows = level < 6? getRandomInt(5, 7) : getRandomInt(7, 12);
-            let max_empty = level < 6? 6 : 15;
-            this.bricks = new Bricks(6, rows, brick_width, BRICK_HEIGHT);
+        if (window.levels[level]) {
+            level = window.levels[level];
+            let brick_width = Math.round(canvas.width/level[0].length);
+            this.bricks = new Bricks(level[0].length, level.length, brick_width, BRICK_HEIGHT, level);
+        } else {
+            let cols = 6 + (level < 10? 0 : 2*getRandomInt(0, 1));
+            let brick_width = Math.round(canvas.width/cols);
+            let rows = level < 10? getRandomInt(5, 6) : getRandomInt(7, 12);
+            let max_empty = level < 10? 6 : 15;
+            this.bricks = new Bricks(cols, rows, brick_width, BRICK_HEIGHT);
             let empty = 0;
             let permanent = 0;
             let permanent2 = 0;
@@ -257,7 +188,6 @@ function ArkanoidGame(canvas, context) {
                     this.bricks.bricks[i][j].lifes = lifes;
                 }
             }
-            break;
         }
     };
 
