@@ -130,6 +130,7 @@ function ArkanoidGame(canvas, context) {
         BRICK_HEIGHT = 35,
         BRICK_SCORE = 5;
 
+    this.levelContainer = document.getElementById("level-container");
     this.level = 1;
     this.lifes = 3;
     this.score = 0;
@@ -151,6 +152,7 @@ function ArkanoidGame(canvas, context) {
     };
 
     this.initLevel = function(level) {
+        this.levelContainer.innerHTML = this.level;
         if (window.levels[level]) {
             level = window.levels[level];
             let brick_width = Math.round(canvas.width/level[0].length);
