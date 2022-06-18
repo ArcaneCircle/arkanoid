@@ -351,6 +351,7 @@ function ArkanoidGame(canvas, context) {
 
         if (this.ball.y + this.ball.radius > canvas.height) {
             // lost one life
+            window.navigator.vibrate(100);
             localStorage.lifes = --this.lifes;
             this.ball.speed = BALL_DEFAULT_SPEED;
             if (this.lifes == 0) {
