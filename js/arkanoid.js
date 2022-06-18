@@ -327,7 +327,7 @@ function ArkanoidGame(canvas, context) {
         // ball bounce from paddle
         if ((this.ball.x + this.ball.radius > this.paddle.x && this.ball.x - this.ball.radius < this.paddle.x + this.paddle.width) &&
             (this.ball.y + this.ball.radius > this.paddle.y)) {
-            if (this.ball.speed < BALL_MAX_SPEED) this.ball.speed += 0.5;
+            if (this.ball.speed < BALL_MAX_SPEED) this.ball.speed += getRandomInt(1, 3)*0.1 + (this.level < 4? 0.1 : 0.2);
             if (this.ball.dir & BallDirs.DOWN) {
                 this.ball.dir = this.ball.dir - BallDirs.DOWN + BallDirs.UP;
             } else if (this.ball.dir & BallDirs.UP) {
