@@ -133,6 +133,7 @@ function ArkanoidGame(canvas, context) {
     this.level = 0;
     this.lifes = 3;
     this.score = 0;
+    canvas.width = Math.max(canvas.width, PADDLE_WIDTH * 3);
     this.paddle = new Paddle(canvas.width / 2 - PADDLE_WIDTH / 2, canvas.height - 20, PADDLE_WIDTH, PADDLE_HEIGHT);
     this.ball = new Ball(canvas.width / 2, canvas.height / 2, BALL_RADIUS, BallDirs.NONE, BALL_DEFAULT_SPEED);
     this.gameOver = false;
