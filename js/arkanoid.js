@@ -471,7 +471,8 @@ function ArkanoidGame(canvas, context) {
     this.startGame = function() {
         if (this.gamePaused) return;
         if (this.ball.dir == BallDirs.NONE) {
-            this.ball.dir = BallDirs.RIGHT + BallDirs.UP;
+            let dirs = [BallDirs.LEFT, BallDirs.RIGHT];
+            this.ball.dir = dirs[getRandomInt(0, 1)] + BallDirs.UP;
         }
     };
 
