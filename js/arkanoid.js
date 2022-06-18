@@ -468,6 +468,7 @@ function ArkanoidGame(canvas, context) {
         if (levelUp) {
             window.highscores.setScore(this.score);
             this.ball.dir = BallDirs.NONE;
+            this.ball.speed = BALL_DEFAULT_SPEED;
             localStorage.lifes = ++this.lifes;
             localStorage.level = ++this.level;
             localStorage.score = this.score;
