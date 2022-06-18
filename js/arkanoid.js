@@ -110,7 +110,7 @@ function Bricks(hor_num, vert_num, brick_width, brick_height, level) {
     for (var i = 0; i < vert_num; i++) {
         this.bricks[i] = new Array();
         for (var j = 0; j < hor_num; j++) {
-            this.bricks[i][j] = new Brick(j * brick_width, i * brick_height, brick_width, brick_height, level? level[i][j]: BricksTypes.DEFAULT);
+            this.bricks[i][j] = new Brick(j * brick_width, i * brick_height, brick_width, brick_height, level? level[i][j]: 0);
         }
     }
 }
@@ -130,7 +130,7 @@ function ArkanoidGame(canvas, context) {
         BRICK_HEIGHT = 35,
         BRICK_SCORE = 5;
 
-    this.level = 0;
+    this.level = 1;
     this.lifes = 3;
     this.score = 0;
     canvas.width = Math.max(canvas.width, PADDLE_WIDTH * 3);
@@ -156,23 +156,25 @@ function ArkanoidGame(canvas, context) {
             let brick_width = Math.round(canvas.width/level[0].length);
             this.bricks = new Bricks(level[0].length, level.length, brick_width, BRICK_HEIGHT, level);
         } else {
-            let cols = 6 + (level < 10? 0 : 2*getRandomInt(0, 1));
+            let cols = 6 + getRandomInt(0, level < 10? 1 : 3);
             let brick_width = Math.round(canvas.width/cols);
-            let rows = level < 10? getRandomInt(5, 6) : getRandomInt(7, 12);
-            let max_empty = level < 10? 6 : 15;
+            let offset = getRandomInt(0, 1);
+            let rows = (level < 20? 5 : getRandomInt(6, 11)) + offset;
             this.bricks = new Bricks(cols, rows, brick_width, BRICK_HEIGHT);
+
+            let max_empty = (rows-offset-2)*cols / 3;
             let empty = 0;
             let permanent = 0;
             let permanent2 = 0;
-            for (var i = this.bricks.bricks.length-1; i >= 0 ; i--) {
-                for (var j = 0; j < this.bricks.bricks[i].length; j++) {
+            for (var i = rows-1; i >= offset ; i--) {
+                for (var j = 0; j < cols; j++) {
                     let lifes = 0;
-                    if (i === this.bricks.bricks.length-1) {
+                    if (i === rows-1) {
                         if (permanent2 < 3) {
                             lifes = getRandomInt(-1, 0);
                             if (lifes === -1) permanent2++;
                         }
-                    } else if (i !== this.bricks.bricks.length-2) {
+                    } else if (i !== rows-2) {
                         lifes = getRandomInt(0, 6) * getRandomInt(0, 1);
                         if (lifes === 0) {
                             if (empty++ >= max_empty) {
@@ -258,7 +260,10 @@ function ArkanoidGame(canvas, context) {
         // ball bounce from paddle
         if ((this.ball.x + this.ball.radius > this.paddle.x && this.ball.x - this.ball.radius < this.paddle.x + this.paddle.width) &&
             (this.ball.y + this.ball.radius > this.paddle.y)) {
-            if (this.ball.speed < BALL_MAX_SPEED) this.ball.speed += getRandomInt(1, 3)*0.1 + (this.level < 4? 0.1 : 0.2);
+            let maxSpeed = BALL_MAX_SPEED - (this.level < 10? 1 : 0);
+            if (this.ball.speed < maxSpeed) {
+                this.ball.speed += getRandomInt(1, 3)*0.1 + (this.level < 10? 0.1 : 0.2);
+            }
             if (this.ball.dir & BallDirs.DOWN) {
                 this.ball.dir = this.ball.dir - BallDirs.DOWN + BallDirs.UP;
             } else if (this.ball.dir & BallDirs.UP) {
@@ -287,8 +292,8 @@ function ArkanoidGame(canvas, context) {
             this.ball.speed = BALL_DEFAULT_SPEED;
             if (this.lifes == 0) {
                 this.gameOver = true;
-                localStorage.level = 0;
-                localStorage.score = 0;
+                localStorage.removeItem("level");
+                localStorage.removeItem("score");
             } else {
                 this.ball.x = canvas.width / 2;
                 this.ball.y = canvas.height / 2;
