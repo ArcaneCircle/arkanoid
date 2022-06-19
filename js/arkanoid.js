@@ -267,7 +267,7 @@ function ArkanoidGame(canvas, context) {
         // collision with paddle
         if (this.ball.dir !== BallDirs.NONE && (this.ball.x + this.ball.radius >= this.paddle.x && this.ball.x - this.ball.radius <= this.paddle.x + this.paddle.width) &&
             (this.ball.y + this.ball.radius >= this.paddle.y)) {
-            let maxSpeed = BALL_MAX_SPEED - (this.level < 10? 2 : 0);
+            let maxSpeed = BALL_MAX_SPEED - (this.level < 5? 2 : this.level < 10? 1 : 0);
             if (this.ball.speed < maxSpeed) {
                 this.ball.speed += getRandomInt(2, 3)*0.1 + (this.level < 10? 0.1 : 0.2);
                 console.log("ball.speed=" + this.ball.speed);
