@@ -1,3 +1,5 @@
+import {Howl} from 'howler';
+
 let arkanoidGame,
     imgBall,
     imgPaddle,
@@ -27,9 +29,9 @@ function loadAssets( ) {
     imgBall = new Image(); imgBall.src = "./images/ball.png";
 
     //load audio
-    sfxBounce = new Sound("sounds/bounce.mp3");
-    sfxWin = new Sound("sounds/victory.mp3");
-    sfxHit = new Sound("sounds/hit.mp3");
+    sfxBounce = new Howl({src: ["sounds/bounce.mp3"]});
+    sfxWin = new Howl({src: ["sounds/victory.mp3"]});
+    sfxHit = new Howl({src: ["sounds/hit.mp3"]});
 }
 
 function getRandomInt(min, max) {
@@ -74,6 +76,28 @@ function Ball(x, y, radius, dir, speed) {
     this.radius = radius;
     this.dir = BallDirs.NONE;
     this.speed = speed;
+    this.changeDir = function(dir) {
+        switch (dir) {
+        case BallDirs.LEFT:
+            if (this.dir & BallDirs.RIGHT) this.dir -= BallDirs.RIGHT;
+            if (!(this.dir & BallDirs.LEFT)) this.dir += BallDirs.LEFT;
+            break;
+        case BallDirs.RIGHT:
+            if (this.dir & BallDirs.LEFT) this.dir -= BallDirs.LEFT;
+            if (!(this.dir & BallDirs.RIGHT)) this.dir += BallDirs.RIGHT;
+            break;
+        case BallDirs.UP:
+            if (this.dir & BallDirs.DOWN) this.dir -= BallDirs.DOWN;
+            if (!(this.dir & BallDirs.UP)) this.dir += BallDirs.UP;
+            break;
+        case BallDirs.DOWN:
+            if (this.dir & BallDirs.UP) this.dir -= BallDirs.UP;
+            if (!(this.dir & BallDirs.DOWN)) this.dir += BallDirs.DOWN;
+            break;
+        default:
+            this.dir = BallDirs.NONE;
+        }
+    };
 }
 
 function Brick(x, y, width, height, type) {
@@ -104,29 +128,27 @@ function ArkanoidGame(canvas, context) {
         PADDLE_SPEED = 3,
         BALL_RADIUS = 5,
         BALL_DEFAULT_SPEED = 5,
-        BALL_MAX_SPEED = 8,
+        BALL_MAX_SPEED = 10,
         BRICK_WIDTH = 81,
         BRICK_HEIGHT = 35,
         BRICK_SCORE = 5;
 
     this.levelContainer = document.getElementById("level-container");
-    this.level = 1;
-    this.lifes = 3;
-    this.score = 0;
     canvas.width = Math.max(canvas.width, PADDLE_WIDTH * 3);
-    this.paddle = new Paddle(canvas.width / 2 - PADDLE_WIDTH / 2, canvas.height - 20, PADDLE_WIDTH, PADDLE_HEIGHT);
+    this.paddle = new Paddle(canvas.width / 2 - PADDLE_WIDTH / 2, canvas.height - 18, PADDLE_WIDTH, PADDLE_HEIGHT);
     this.ball = new Ball(canvas.width / 2, canvas.height / 2, BALL_RADIUS, BallDirs.NONE, BALL_DEFAULT_SPEED);
-    this.gameOver = false;
-    this.gamePaused = false;
     this.bricks = new Bricks(5, 2, BRICK_WIDTH, BRICK_HEIGHT);
 
     this.init = function() {
-        this.level = parseInt(localStorage.level) || this.level;
-        this.lifes = parseInt(localStorage.lifes) || this.lifes;
-        this.score = parseInt(localStorage.score) || this.score;
+        this.level = parseInt(localStorage.level) || 1;
+        this.lifes = parseInt(localStorage.lifes) || 3;
+        this.score = parseInt(localStorage.score) || 0;
         this.gameOver = false;
         this.gamePaused = false;
+        this.paddle.x = canvas.width / 2 - PADDLE_WIDTH / 2;
         this.ball.dir = BallDirs.NONE;
+        this.ball.x = this.paddle.x + this.paddle.width / 2;
+        this.ball.y = this.paddle.y - this.ball.radius;
         this.initLevel(this.level);
     };
 
@@ -175,7 +197,7 @@ function ArkanoidGame(canvas, context) {
     };
 
     this.drawBall = function() {
-        context.drawImage(imgBall, this.ball.x, this.ball.y);
+        context.drawImage(imgBall, this.ball.x - this.ball.radius, this.ball.y - this.ball.radius);
     };
 
     this.drawPaddle = function() {
@@ -216,7 +238,7 @@ function ArkanoidGame(canvas, context) {
             }
             this.drawScoreboard();
             this.gamePaused = true;
-        } else if(this.ball.dir==BallDirs.NONE) {
+        } else if(this.ball.dir === BallDirs.NONE) {
             this.drawScoreboard();
         }
 
@@ -232,47 +254,52 @@ function ArkanoidGame(canvas, context) {
     this.update = function() {
         if (this.gamePaused || this.gameOver) return;
 
+        if (this.ball.dir < 0 || this.ball.dir > 12 || this.ball.dir === 7 && this.ball.dir === 11) {
+            console.log("WRONG dir="+this.ball.dir);
+        }
+
         // update ball pos
         if (this.ball.dir & BallDirs.RIGHT) this.ball.x += this.ball.speed;
         else if (this.ball.dir & BallDirs.LEFT) this.ball.x -= this.ball.speed;
         if (this.ball.dir & BallDirs.UP) this.ball.y -= this.ball.speed;
         else if (this.ball.dir & BallDirs.DOWN) this.ball.y += this.ball.speed;
 
-        // ball bounce from paddle
-        if ((this.ball.x + this.ball.radius > this.paddle.x && this.ball.x - this.ball.radius < this.paddle.x + this.paddle.width) &&
-            (this.ball.y + this.ball.radius > this.paddle.y)) {
-            let maxSpeed = BALL_MAX_SPEED - (this.level < 10? 1 : 0);
+        // collision with paddle
+        if (this.ball.dir !== BallDirs.NONE && (this.ball.x + this.ball.radius >= this.paddle.x && this.ball.x - this.ball.radius <= this.paddle.x + this.paddle.width) &&
+            (this.ball.y + this.ball.radius >= this.paddle.y)) {
+            let maxSpeed = BALL_MAX_SPEED - (this.level < 10? 2 : 0);
             if (this.ball.speed < maxSpeed) {
-                this.ball.speed += getRandomInt(1, 3)*0.1 + (this.level < 10? 0.1 : 0.2);
+                this.ball.speed += getRandomInt(2, 3)*0.1 + (this.level < 10? 0.1 : 0.2);
+                console.log("ball.speed=" + this.ball.speed);
             }
             if (this.ball.dir & BallDirs.DOWN) {
-                this.ball.dir = this.ball.dir - BallDirs.DOWN + BallDirs.UP;
-            } else if (this.ball.dir & BallDirs.UP) {
-                this.ball.dir = this.ball.dir - BallDirs.UP + BallDirs.DOWN;
+                this.ball.changeDir(BallDirs.UP);
+                this.ball.y = this.paddle.y - this.ball.radius;
+                this.ball.x += 5;  // avoid infinite bouncing loops
             }
         }
 
-        // update ball
-        if (this.ball.x - this.ball.radius < 0) {
+        // collision with wall
+        if (this.ball.x - this.ball.radius <= 0) {
             this.ball.x = this.ball.radius;
-            this.ball.dir = this.ball.dir - BallDirs.LEFT + BallDirs.RIGHT;
+            this.ball.changeDir(BallDirs.RIGHT);
         }
-        if (this.ball.x + this.ball.radius > canvas.width) {
+        if (this.ball.x + this.ball.radius >= canvas.width) {
             this.ball.x = canvas.width - this.ball.radius;
-            this.ball.dir = this.ball.dir - BallDirs.RIGHT + BallDirs.LEFT;
+            this.ball.changeDir(BallDirs.LEFT);
         }
-        if (this.ball.y - this.ball.radius < 0) {
+        if (this.ball.y - this.ball.radius <= 0) {
             this.ball.y = this.ball.radius;
-            this.ball.dir = this.ball.dir - BallDirs.UP + BallDirs.DOWN;
+            this.ball.changeDir(BallDirs.DOWN);
         }
 
-        if (this.ball.y + this.ball.radius > canvas.height) {
+        if (this.ball.y + this.ball.radius >= canvas.height) {
             // lost one life
             sfxHit.play();
             window.navigator.vibrate(100);
             localStorage.lifes = --this.lifes;
             this.ball.speed = BALL_DEFAULT_SPEED;
-            if (this.lifes == 0) {
+            if (this.lifes === 0) {
                 this.gameOver = true;
                 localStorage.removeItem("level");
                 localStorage.removeItem("score");
@@ -283,121 +310,135 @@ function ArkanoidGame(canvas, context) {
             }
         }
 
-        if (this.ball.dir == BallDirs.NONE) {
-            this.ball.x = this.paddle.x + this.paddle.width / 2 - this.ball.radius;
-            this.ball.y = this.paddle.y - this.ball.radius * 2;
+        // initial state
+        if (this.ball.dir === BallDirs.NONE) {
+            this.ball.x = this.paddle.x + this.paddle.width / 2;
+            this.ball.y = this.paddle.y - this.ball.radius;
         }
 
-        // bounces
+        let levelUp = true;
+        // collision with brick
+        let collision = 0;
+        let oldDir = this.ball.dir;
+        let oldX = this.ball.x;
         for (var i = 0; i < this.bricks.bricks.length; i++) {
             for (var j = 0; j < this.bricks.bricks[i].length; j++) {
                 let brick = this.bricks.bricks[i][j];
                 if (brick.lifes !== 0) {
-                    if (this.ball.dir == BallDirs.LEFT + BallDirs.UP) {
-                        if (this.isPointInRect(this.ball.x - this.ball.speed, this.ball.y - 0, brick.x, brick.y, brick.width, brick.height)) {
+                    if (oldDir === BallDirs.LEFT + BallDirs.UP) {
+                        if (this.isPointInRect(oldX - this.ball.speed, this.ball.y, brick.x, brick.y, brick.width, brick.height)) {
+                            console.log(`collision right of brick(${i}, ${j})`);
                             sfxBounce.play();
-                            this.ball.x = brick.x + brick.width + this.ball.speed;
-                            this.ball.dir = this.ball.dir - BallDirs.LEFT + BallDirs.RIGHT;
+                            this.ball.x = brick.x + brick.width + this.ball.radius;
+                            this.ball.changeDir(BallDirs.RIGHT);
                             if (brick.lifes > 0) {
                                 brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
-                            return;
+                            collision++;
                         }
-                        if (this.isPointInRect(this.ball.x - 0, this.ball.y - this.ball.speed, brick.x, brick.y, brick.width, brick.height)) {
+                        else if (this.isPointInRect(oldX, this.ball.y - this.ball.speed, brick.x, brick.y, brick.width, brick.height)) {
+                            console.log(`collision bottom of brick(${i}, ${j})`);
                             sfxBounce.play();
-                            this.ball.y = brick.y + brick.height + this.ball.speed;
-                            this.ball.dir = this.ball.dir - BallDirs.UP + BallDirs.DOWN;
+                            this.ball.y = brick.y + brick.height + this.ball.radius;
+                            this.ball.changeDir(BallDirs.DOWN);
                             if (brick.lifes > 0) {
                                 brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
-                            return;
+                            collision++;
                         }
-                    } else if (this.ball.dir == BallDirs.LEFT + BallDirs.DOWN) {
-                        if (this.isPointInRect(this.ball.x - this.ball.speed, this.ball.y + 0, brick.x, brick.y, brick.width, brick.height)) {
+                    }
+                    else if (oldDir === BallDirs.LEFT + BallDirs.DOWN) {
+                        if (this.isPointInRect(oldX - this.ball.speed, this.ball.y + 0, brick.x, brick.y, brick.width, brick.height)) {
+                            console.log(`collision right of brick(${i}, ${j})`);
                             sfxBounce.play();
-                            this.ball.x = brick.x + brick.width + this.ball.speed;
-                            this.ball.dir = this.ball.dir - BallDirs.LEFT + BallDirs.RIGHT;
+                            this.ball.x = brick.x + brick.width + this.ball.radius;
+                            this.ball.changeDir(BallDirs.RIGHT);
                             if (brick.lifes > 0) {
                                 brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
-                            return;
+                            collision++;
                         }
-                        if (this.isPointInRect(this.ball.x - 0, this.ball.y + this.ball.speed, brick.x, brick.y, brick.width, brick.height)) {
+                        else if (this.isPointInRect(oldX, this.ball.y + this.ball.speed, brick.x, brick.y, brick.width, brick.height)) {
+                            console.log(`collision top of brick(${i}, ${j})`);
                             sfxBounce.play();
-                            this.ball.y = brick.y - this.ball.speed;
-                            this.ball.dir = this.ball.dir - BallDirs.DOWN + BallDirs.UP;
+                            this.ball.y = brick.y - this.ball.radius;
+                            this.ball.changeDir(BallDirs.UP);
                             if (brick.lifes > 0) {
                                 brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
-                            return;
+                            collision++;
                         }
-                    } else if (this.ball.dir == BallDirs.RIGHT + BallDirs.UP) {
-                        if (this.isPointInRect(this.ball.x + this.ball.speed, this.ball.y - 0, brick.x, brick.y, brick.width, brick.height)) {
+                    }
+                    else if (oldDir === BallDirs.RIGHT + BallDirs.UP) {
+                        if (this.isPointInRect(oldX + this.ball.speed, this.ball.y, brick.x, brick.y, brick.width, brick.height)) {
+                            console.log(`collision left of brick(${i}, ${j})`);
                             sfxBounce.play();
-                            this.ball.x = brick.x - this.ball.speed;
-                            this.ball.dir = this.ball.dir - BallDirs.RIGHT + BallDirs.LEFT;
+                            this.ball.x = brick.x - this.ball.radius;
+                            this.ball.changeDir(BallDirs.LEFT);
                             if (brick.lifes > 0) {
                                 brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
-                            return;
+                            collision++;
                         }
-                        if (this.isPointInRect(this.ball.x + 0, this.ball.y - this.ball.speed, brick.x, brick.y, brick.width, brick.height)) {
+                        else if (this.isPointInRect(oldX, this.ball.y - this.ball.speed, brick.x, brick.y, brick.width, brick.height)) {
+                            console.log(`collision bottom of brick(${i}, ${j})`);
                             sfxBounce.play();
-                            this.ball.y = brick.y + brick.height + this.ball.speed;
-                            this.ball.dir = this.ball.dir - BallDirs.UP + BallDirs.DOWN;
+                            this.ball.y = brick.y + brick.height + this.ball.radius;
+                            this.ball.changeDir(BallDirs.DOWN);
                             if (brick.lifes > 0) {
                                 brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
-                            return;
+                            collision++;
                         }
-                    } else if (this.ball.dir == BallDirs.RIGHT + BallDirs.DOWN) {
-                        if (this.isPointInRect(this.ball.x + this.ball.speed, this.ball.y + 0, brick.x, brick.y, brick.width, brick.height)) {
+                    }
+                    else if (oldDir === BallDirs.RIGHT + BallDirs.DOWN) {
+                        if (this.isPointInRect(oldX + this.ball.speed, this.ball.y, brick.x, brick.y, brick.width, brick.height)) {
+                            console.log(`collision left of brick(${i}, ${j})`);
                             sfxBounce.play();
-                            this.ball.x = brick.x - this.ball.speed;
-                            this.ball.dir = this.ball.dir - BallDirs.RIGHT + BallDirs.LEFT;
+                            this.ball.x = brick.x - this.ball.radius;
+                            this.ball.changeDir(BallDirs.LEFT);
                             if (brick.lifes > 0) {
                                 brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
-                            return;
+                            collision++;
                         }
-                        if (this.isPointInRect(this.ball.x + 0, this.ball.y + this.ball.speed, brick.x, brick.y, brick.width, brick.height)) {
+                        else if (this.isPointInRect(oldX, this.ball.y + this.ball.speed, brick.x, brick.y, brick.width, brick.height)) {
+                            console.log(`collision top of brick(${i}, ${j})`);
                             sfxBounce.play();
-                            this.ball.y = brick.y - this.ball.speed;
-                            this.ball.dir = this.ball.dir - BallDirs.DOWN + BallDirs.UP;
+                            this.ball.y = brick.y - this.ball.radius;
+                            this.ball.changeDir(BallDirs.UP);
                             if (brick.lifes > 0) {
                                 brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
-                            return;
+                            collision++;
                         }
+                    }
+
+                    if (brick.lifes > 0) {
+                        levelUp = false;
                     }
                 }
             }
         }
 
-        let levelUp = true;
-        for (var i = 0; i < this.bricks.bricks.length; i++) {
-            if (!levelUp) break;
-            for (var j = 0; j < this.bricks.bricks[i].length; j++) {
-                if (this.bricks.bricks[i][j].lifes > 0) {
-                    levelUp = false;
-                    break;
-                }
-            }
+        if (collision) {
+            return;
         }
+
         if (levelUp) {
             sfxWin.play();
             window.highscores.setScore(this.score);
             this.ball.dir = BallDirs.NONE;
             this.ball.speed = BALL_DEFAULT_SPEED;
-            localStorage.lifes = ++this.lifes;
+            if (this.lifes < 10) localStorage.lifes = ++this.lifes;
             localStorage.level = ++this.level;
             localStorage.score = this.score;
             this.initLevel(this.level);
@@ -406,17 +447,8 @@ function ArkanoidGame(canvas, context) {
 
 
     this.isPointInRect = function(x, y, rect_x, rect_y, rect_width, rect_height) {
-        if ((x > rect_x && x < rect_x + rect_width) &&
-            (y > rect_y && y < rect_y + rect_height))
-            return true;
-        return false;
-    };
-
-    this.isBallIntersectBrick = function(i, j) {
-        if ((this.ball.x + this.ball.radius > this.bricks.bricks[i][j].x &&
-             this.ball.x - this.ball.radius < this.bricks.bricks[i][j].x + this.bricks.bricks[i][j].width) &&
-            (this.ball.y + this.ball.radius > this.bricks.bricks[i][j].y &&
-             this.ball.y - this.ball.radius < this.bricks.bricks[i][j].y + this.bricks.bricks[i][j].height))
+        if ((x >= rect_x && x <= rect_x + rect_width) &&
+            (y >= rect_y && y <= rect_y + rect_height))
             return true;
         return false;
     };
@@ -461,7 +493,7 @@ function ArkanoidGame(canvas, context) {
 
     this.startGame = function() {
         if (this.gamePaused) return;
-        if (this.ball.dir == BallDirs.NONE) {
+        if (this.ball.dir === BallDirs.NONE) {
             let dirs = [BallDirs.LEFT, BallDirs.RIGHT];
             this.ball.dir = dirs[getRandomInt(0, 1)] + BallDirs.UP;
         }
@@ -525,7 +557,7 @@ window.addEventListener("load", () => {
 
         document.onclick = function(){
             if (arkanoidGame.gameOver) {
-                document.location.reload(true);
+                arkanoidGame.init();
             } else {
                 arkanoidGame.startGame();
             }
@@ -543,7 +575,7 @@ window.addEventListener("load", () => {
                 if (arkanoidGame.ball.dir === BallDirs.NONE) {
                     arkanoidGame.startGame();
                 } else if (arkanoidGame.gameOver) {
-                    document.location.reload(true);
+                    arkanoidGame.init();
                 } else {
                     arkanoidGame.togglePause();
                 }

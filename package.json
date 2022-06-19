@@ -10,5 +10,8 @@
     "@ffflorian/jszip-cli": "^3.1.6",
     "eruda": "^2.4.1",
     "vite": "^2.9.9"
+  },
+  "dependencies": {
+    "howler": "^2.2.3"
   }
 }
