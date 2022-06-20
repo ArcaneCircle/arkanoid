@@ -6,7 +6,8 @@ let arkanoidGame,
     imgBricks,
     sfxBounce,
     sfxHit,
-    sfxWin;
+    sfxWin,
+    scoreboard;
 let BallDirs = {
     NONE : 0,
     LEFT : 1,
@@ -152,6 +153,7 @@ function ArkanoidGame(canvas, context) {
         this.ball.x = this.paddle.x + this.paddle.width / 2;
         this.ball.y = this.paddle.y - this.ball.radius;
         this.initLevel(this.level);
+        scoreboard.classList.add("opened");
     };
 
     this.initLevel = function(level) {
@@ -238,10 +240,7 @@ function ArkanoidGame(canvas, context) {
                 window.highscores.setScore(this.score);
                 this.bricks = new Bricks(0, 0, BRICK_WIDTH, BRICK_HEIGHT);
             }
-            this.drawScoreboard();
             this.gamePaused = true;
-        } else if(this.ball.dir === BallDirs.NONE) {
-            this.drawScoreboard();
         }
 
         context.fillStyle = 'rgb(255,255,220)';
@@ -300,6 +299,7 @@ function ArkanoidGame(canvas, context) {
             // lost one life
             sfxHit.play();
             window.navigator.vibrate(100);
+            scoreboard.classList.add("opened");
             localStorage.lifes = --this.lifes;
             this.ball.speed = BALL_DEFAULT_SPEED;
             if (this.lifes === 0) {
@@ -495,20 +495,9 @@ function ArkanoidGame(canvas, context) {
     };
 
     this.startGame = function() {
+        scoreboard.classList.remove("opened");
         let dirs = [BallDirs.LEFT, BallDirs.RIGHT];
         this.ball.dir = dirs[getRandomInt(0, 1)] + BallDirs.UP;
-    };
-
-    this.drawScoreboard = function() {
-        let board = window.highscores.getHighScores();
-        if (board.length === 0) return;
-
-        context.fillStyle = 'rgb(255,255,0)';
-        context.font = 'bold 20px Arial';
-        context.fillText('Scoreboard', this.width / 2 - 50, (this.height / 2)-20);
-        for (let i = 0; i < board.length; i++) {
-            context.fillText(board[i].pos + ". " + board[i].name + " " + board[i].score, this.width / 2 - 50, (this.height / 2)+i*20);
-        }
     };
 };
 
@@ -521,20 +510,32 @@ function render() {
     arkanoidGame.render();
 }
 
-function checkCanvasIsSupported() {
+function setup() {
+    scoreboard = document.getElementById("scoreboard");
     let canvas = document.getElementById("canvas");
-    canvas.width =  Math.min((window.innerWidth || document.documentElement.clientWidth ||
-                              document.body.clientWidth)-15, 500);
+    let width = Math.min((window.innerWidth || document.documentElement.clientWidth ||
+                          document.body.clientWidth)-15, 500);
+    canvas.width =  width;
     let height =(window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight);
-    canvas.height =  height - height/10;
+    height -= height/10;
+    canvas.height =  height;
     canvas.style.cursor = "none";
+
+    let boardHeight = height*2/3;
+    scoreboard.style.height = boardHeight + "px";
+    scoreboard.style.top = height/2 + "px";
+
+    let boardWidth = width*4/5;
+    scoreboard.style.width = boardWidth + "px";
+    scoreboard.style.left = width/2 + "px";
+
+    scoreboard.style.margin = (-boardHeight/2) + "px 0 0 " + (-boardWidth/2) + "px";
+
     if (canvas.getContext) {
         arkanoidGame = new ArkanoidGame(canvas, canvas.getContext('2d'));
         arkanoidGame.init();
 
         setInterval(render, 1000 / 60);
-    } else {
-        document.getElementById("body").innerHTML = "Sorry, but your browser doesn't support a canvas.";
     }
 }
 
@@ -543,8 +544,8 @@ function checkCanvasIsSupported() {
 loadAssets();
 
 window.addEventListener("load", () => {
-    window.highscores.init("Arkanoid").then(() =>{
-        checkCanvasIsSupported();
+    window.highscores.init("Arkanoid", "scoreboard").then(() => {
+        setup();
 
         document.onmousemove = function(event) {
             event.preventDefault()
