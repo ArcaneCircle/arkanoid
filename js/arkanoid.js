@@ -277,7 +277,7 @@ function ArkanoidGame(canvas, context) {
                 this.ball.changeDir(BallDirs.UP);
                 this.ball.y = this.paddle.y - this.ball.radius;
                 // avoid infinite bouncing loops
-                this.ball.x += (this.ball.x > this.paddle.x/2)? 10 : -10;
+                this.ball.x += (this.ball.x > this.paddle.x + this.paddle.width/2)? 10 : -10;
             }
         }
 
