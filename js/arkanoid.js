@@ -277,7 +277,8 @@ function ArkanoidGame(canvas, context) {
             if (this.ball.dir & BallDirs.DOWN) {
                 this.ball.changeDir(BallDirs.UP);
                 this.ball.y = this.paddle.y - this.ball.radius;
-                this.ball.x += 5;  // avoid infinite bouncing loops
+                // avoid infinite bouncing loops
+                this.ball.x += (this.ball.x > this.paddle.x/2)? 10 : -10;
             }
         }
 
