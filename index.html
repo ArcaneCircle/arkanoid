@@ -4,12 +4,13 @@
         <title>Arkanoid Game</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="./styles.css"/>
         <script src="webxdc.js"></script>
         <script type="module" src="./js/webxdc-scores.js"></script>
     </head>
-    <body id="body" scroll="no" style="background: #000000;overflow: hidden;">
-        <canvas id="gameCanvas" style="border: solid 1px gray;"></canvas>
-        <div style="color: rgb(255,255,220);font-family: Arial;font-weight: bold;">
+    <body id="body" scroll="no">
+        <canvas id="canvas"></canvas>
+        <div class="label">
             Level: <span id="level-container"></span>
         </div>
         <br/>

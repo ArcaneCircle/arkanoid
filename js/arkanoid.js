@@ -522,7 +522,7 @@ function render() {
 }
 
 function checkCanvasIsSupported() {
-    let canvas = document.getElementById("gameCanvas");
+    let canvas = document.getElementById("canvas");
     canvas.width =  Math.min((window.innerWidth || document.documentElement.clientWidth ||
                               document.body.clientWidth)-15, 500);
     canvas.height = (window.innerHeight|| document.documentElement.clientHeight||
