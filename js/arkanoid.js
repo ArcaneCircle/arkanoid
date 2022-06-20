@@ -153,10 +153,10 @@ function ArkanoidGame(canvas, context) {
         this.ball.x = this.paddle.x + this.paddle.width / 2;
         this.ball.y = this.paddle.y - this.ball.radius;
         this.initLevel(this.level);
-        scoreboard.classList.add("opened");
     };
 
     this.initLevel = function(level) {
+        if (scoreboard.innerHTML) scoreboard.classList.add("opened");
         this.levelContainer.innerHTML = this.level;
         if (window.levels[level]) {
             level = window.levels[level];
@@ -299,10 +299,11 @@ function ArkanoidGame(canvas, context) {
             // lost one life
             sfxHit.play();
             window.navigator.vibrate(100);
-            scoreboard.classList.add("opened");
+            if (scoreboard.innerHTML) scoreboard.classList.add("opened");
             localStorage.lifes = --this.lifes;
             this.ball.speed = BALL_DEFAULT_SPEED;
             if (this.lifes === 0) {
+                scoreboard.classList.add("opened");
                 this.gameOver = true;
                 localStorage.removeItem("level");
                 localStorage.removeItem("score");
