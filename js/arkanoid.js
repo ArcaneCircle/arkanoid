@@ -152,12 +152,14 @@ function ArkanoidGame(canvas, context) {
         this.ball.dir = BallDirs.NONE;
         this.ball.x = this.paddle.x + this.paddle.width / 2;
         this.ball.y = this.paddle.y - this.ball.radius;
-        this.initLevel(this.level);
+        this.initLevel();
     };
 
-    this.initLevel = function(level) {
+    this.initLevel = function() {
         if (scoreboard.innerHTML) scoreboard.classList.add("opened");
         this.levelContainer.innerHTML = this.level;
+        let level = this.level;
+        if (level >= 60) level = (level % 60) + 2;
         if (window.levels[level]) {
             level = window.levels[level];
             let brick_width = Math.round(this.width/level[0].length);
@@ -445,7 +447,7 @@ function ArkanoidGame(canvas, context) {
             if (this.lifes < 10) localStorage.lifes = ++this.lifes;
             localStorage.level = ++this.level;
             localStorage.score = this.score;
-            this.initLevel(this.level);
+            this.initLevel();
         }
     };
 
