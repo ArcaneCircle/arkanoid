@@ -7,7 +7,8 @@ let arkanoidGame,
     sfxBounce,
     sfxHit,
     sfxWin,
-    scoreboard;
+    scoreboard,
+    LIFE_REGEN = 1000*60*60*8;  // 8 hours
 let BallDirs = {
     NONE : 0,
     LEFT : 1,
@@ -97,6 +98,8 @@ function ArkanoidGame(canvas, context) {
     this.scoreContainer = document.getElementById("score-container");
     this.lifesContainer = document.getElementById("lifes-container");
     this.levelContainer = document.getElementById("level-container");
+    this.timerContainer = document.getElementById("timer-container");
+    this.timerWrapper = document.getElementById("timer-wrapper");
     this.width = Math.max(canvas.width, PADDLE_WIDTH * 3);
     canvas.width = this.width;
     this.height = canvas.height;
@@ -106,15 +109,15 @@ function ArkanoidGame(canvas, context) {
 
     this.init = () => {
         this.level = parseInt(localStorage.level) || 1;
-        this.lifes = parseInt(localStorage.lifes) || 3;
-        this.score = parseInt(localStorage.score) || 0;
-        this.gameOver = false;
+        this.lifes = localStorage.lifes? parseInt(localStorage.lifes) : 3;
+        this.score = window.highscores.getScore();
         this.gamePaused = false;
         this.paddle.x = this.width / 2 - PADDLE_WIDTH / 2;
         this.ball.dir = BallDirs.NONE;  // idle state
         this.scoreContainer.innerHTML = this.score;
         this.lifesContainer.innerHTML = this.lifes;
         this.initLevel();
+        this.interval = setInterval(this.updateTimer, 500);
     };
 
     this.initLevel = () => {
@@ -166,7 +169,7 @@ function ArkanoidGame(canvas, context) {
 
     this.drawBall = () => {
         // ball is idle on the paddle
-        if (this.ball.dir === BallDirs.NONE && !this.gameOver) {
+        if (this.ball.dir === BallDirs.NONE) {
             this.ball.x = this.paddle.x + this.paddle.width / 2;
             this.ball.y = this.paddle.y - this.ball.radius;
         }
@@ -197,9 +200,11 @@ function ArkanoidGame(canvas, context) {
         context.fillStyle = 'rgb(0,10,0)';
         context.fillRect(0, 0, this.width, this.height);
 
-        this.drawBall();
-        this.drawPaddle();
-        this.drawBricks();
+        if (this.lifes) {
+            this.drawBall();
+            this.drawPaddle();
+            this.drawBricks();
+        }
 
         if (this.gamePaused) {
             context.fillStyle = 'rgb(255,255,0)';
@@ -209,7 +214,7 @@ function ArkanoidGame(canvas, context) {
     };
 
     this.update = () => {
-        if (this.gamePaused || this.gameOver || this.ball.dir === BallDirs.NONE) return;
+        if (this.gamePaused || !this.lifes || this.ball.dir === BallDirs.NONE) return;
 
         // update ball pos
         if (this.ball.dir & BallDirs.RIGHT) this.ball.x += this.ball.speed;
@@ -256,12 +261,8 @@ function ArkanoidGame(canvas, context) {
             this.lifesContainer.innerHTML = this.lifes;
             this.ball.speed = BALL_DEFAULT_SPEED;
             if (this.lifes === 0) {
-                window.highscores.setScore(this.score);
-                scoreboard.classList.add("opened");
-                localStorage.removeItem("level");
-                localStorage.removeItem("score");
-                this.gameOver = true;
-                this.bricks = new Bricks(0, 0, BRICK_WIDTH, BRICK_HEIGHT);
+                localStorage.timer = new Date().getTime() + LIFE_REGEN;
+                this.init();
             } else {
                 this.ball.dir = BallDirs.NONE;  // idle state
             }
@@ -387,12 +388,10 @@ function ArkanoidGame(canvas, context) {
             window.highscores.setScore(this.score);
             this.ball.dir = BallDirs.NONE;  // idle state
             this.ball.speed = BALL_DEFAULT_SPEED;
-            if (this.lifes < 10) {
-                localStorage.lifes = ++this.lifes;
-                this.lifesContainer.innerHTML = this.lifes;
+            if (this.lifes < 5) {
+                this.lifesContainer.innerHTML = localStorage.lifes = ++this.lifes;
             }
             localStorage.level = ++this.level;
-            localStorage.score = this.score;
             this.initLevel();
         }
 
@@ -415,12 +414,39 @@ function ArkanoidGame(canvas, context) {
         this.draw();
     };
 
+    this.updateTimer = () => {
+        let timer = parseInt(localStorage.timer) || 0;
+        if (timer) {
+            let now = new Date().getTime();
+            let distance = timer - now;
+            if (distance < 0) {
+                localStorage.timer = 0;
+                clearInterval(this.interval);
+                this.interval = null;
+                this.timerWrapper.classList.remove("opened");
+                this.lifesContainer.innerHTML = localStorage.lifes = ++this.lifes;
+                return;
+            }
+
+            let hours = Math.floor(distance/(1000*60*60));
+            if (hours < 10) hours = "0" + hours;
+            let minutes = Math.floor((distance % (1000*60*60)) / (1000*60));
+            if (minutes < 10) minutes = "0" + minutes;
+            let seconds = Math.floor((distance % (1000*60)) / 1000);
+            if (seconds < 10) seconds = "0" + seconds;
+            this.timerContainer.innerHTML = `${hours}:${minutes}:${seconds}`;
+            this.timerWrapper.classList.add("opened");
+        } else {
+            this.timerWrapper.classList.remove("opened");
+        }
+    };
+
     this.togglePause = () => {
         this.gamePaused = !this.gamePaused;
     };
 
     this.movePaddleLeft = () => {
-        if (this.gamePaused || this.gameOver) return;
+        if (this.gamePaused || !this.lifes) return;
         let x = this.paddle.x - 10 * PADDLE_SPEED;
         if (x < 0) x = 0;
         if (x > this.width - this.paddle.width) x = this.width - this.paddle.width;
@@ -428,7 +454,7 @@ function ArkanoidGame(canvas, context) {
     };
 
     this.movePaddleRight = () => {
-        if (this.gamePaused || this.gameOver) return;
+        if (this.gamePaused || !this.lifes) return;
         let x = this.paddle.x + 10 * PADDLE_SPEED;
         if (x < 0) x = 0;
         if (x > this.width - this.paddle.width) x = this.width - this.paddle.width;
@@ -436,7 +462,7 @@ function ArkanoidGame(canvas, context) {
     };
 
     this.setPaddlePos = (x) => {
-        if (this.gamePaused || this.gameOver) return;
+        if (this.gamePaused || !this.lifes) return;
         if (x < this.paddle.width/2) {
             x = 0;
         } else if (x > this.width - this.paddle.width/2) {
@@ -482,7 +508,6 @@ function setup() {
     let height =(window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight);
     height -= height/10;
     canvas.height =  height;
-    canvas.style.cursor = "none";
 
     let boardHeight = height*2/3;
     scoreboard.style.height = boardHeight + "px";
@@ -503,12 +528,12 @@ function setup() {
 }
 
 function onclick() {
-    if (arkanoidGame.gameOver) {
-        arkanoidGame.init();
-    } else if (arkanoidGame.ball.dir === BallDirs.NONE) {  // idle state
-        arkanoidGame.startGame();
-    } else {
-        arkanoidGame.togglePause();
+    if (arkanoidGame.lifes) {
+        if (arkanoidGame.ball.dir === BallDirs.NONE) {  // idle state
+            arkanoidGame.startGame();
+        } else {
+            arkanoidGame.togglePause();
+        }
     }
 }
 
