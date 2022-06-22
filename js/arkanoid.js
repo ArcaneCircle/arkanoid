@@ -7,7 +7,7 @@ let arkanoidGame,
     sfxBounce,
     sfxHit,
     sfxWin,
-    scoreboard,
+    scoreboard = document.getElementById("scoreboard"),
     LIFE_REGEN = 1000*60*60*8;  // 8 hours
 let BallDirs = {
     NONE : 0,
@@ -500,24 +500,13 @@ function getRandomInt(min, max) {
 }
 
 function setup() {
-    scoreboard = document.getElementById("scoreboard");
     let canvas = document.getElementById("canvas");
-    let width = Math.min((window.innerWidth || document.documentElement.clientWidth ||
-                          document.body.clientWidth)-15, 500);
-    canvas.width =  width;
-    let height =(window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight);
-    height -= height/10;
-    canvas.height =  height;
-
-    let boardHeight = height*2/3;
-    scoreboard.style.height = boardHeight + "px";
-    scoreboard.style.top = height/2 + "px";
-
-    let boardWidth = width*4/5;
-    scoreboard.style.width = boardWidth + "px";
-    scoreboard.style.left = width/2 + "px";
-
-    scoreboard.style.margin = (-boardHeight/2) + "px 0 0 " + (-boardWidth/2) + "px";
+    canvas.width = Math.min(
+        (window.innerWidth || document.documentElement.clientWidth
+         || document.body.clientWidth)-15, 500);
+    canvas.height = Math.min(
+        (window.innerHeight || document.documentElement.clientHeight
+         || document.body.clientHeight)*9/10, canvas.width*2);
 
     if (canvas.getContext) {
         arkanoidGame = new ArkanoidGame(canvas, canvas.getContext('2d'));
