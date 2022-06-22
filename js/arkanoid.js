@@ -6,9 +6,7 @@ let arkanoidGame,
     imgBricks,
     sfxBounce,
     sfxHit,
-    sfxWin,
-    scoreboard = document.getElementById("scoreboard"),
-    LIFE_REGEN = 1000*60*60*8;  // 8 hours
+    sfxWin;
 let BallDirs = {
     NONE : 0,
     LEFT : 1,
@@ -93,8 +91,10 @@ function ArkanoidGame(canvas, context) {
         BALL_MAX_SPEED = 10,
         BRICK_WIDTH = 81,
         BRICK_HEIGHT = 35,
-        BRICK_SCORE = 5;
+        BRICK_SCORE = 5,
+        LIFE_REGEN = 1000*60*60*4;
 
+    this.scoreboard = document.getElementById("scoreboard");
     this.scoreContainer = document.getElementById("score-container");
     this.lifesContainer = document.getElementById("lifes-container");
     this.levelContainer = document.getElementById("level-container");
@@ -121,7 +121,7 @@ function ArkanoidGame(canvas, context) {
     };
 
     this.initLevel = () => {
-        if (scoreboard.innerHTML) scoreboard.classList.add("opened");
+        if (this.scoreboard.innerHTML) this.scoreboard.classList.add("opened");
         this.levelContainer.innerHTML = this.level;
         let level = this.level;
         if (level >= 60) level = (level % 60) + 2;
@@ -260,7 +260,7 @@ function ArkanoidGame(canvas, context) {
             } catch (e) {
                 console.error(e);
             }
-            if (scoreboard.innerHTML) scoreboard.classList.add("opened");
+            if (this.scoreboard.innerHTML) this.scoreboard.classList.add("opened");
             localStorage.lifes = --this.lifes;
             this.lifesContainer.innerHTML = this.lifes;
             this.ball.speed = BALL_DEFAULT_SPEED;
@@ -428,7 +428,7 @@ function ArkanoidGame(canvas, context) {
                 clearInterval(this.interval);
                 this.interval = null;
                 this.timerWrapper.classList.remove("opened");
-                this.lifesContainer.innerHTML = localStorage.lifes = ++this.lifes;
+                this.lifesContainer.innerHTML = localStorage.lifes = 1;
                 return;
             }
 
@@ -478,7 +478,7 @@ function ArkanoidGame(canvas, context) {
     };
 
     this.startGame = () => {
-        scoreboard.classList.remove("opened");
+        this.scoreboard.classList.remove("opened");
         let dirs = [BallDirs.LEFT, BallDirs.RIGHT];
         this.ball.dir = dirs[getRandomInt(0, 1)] + BallDirs.UP;
     };
