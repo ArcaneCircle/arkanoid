@@ -255,7 +255,11 @@ function ArkanoidGame(canvas, context) {
         // lost one life
         if (this.ball.y + this.ball.radius >= this.height) {
             sfxHit.play();
-            window.navigator.vibrate(100);
+            try {
+                window.navigator.vibrate(100);
+            } catch (e) {
+                console.error(e);
+            }
             if (scoreboard.innerHTML) scoreboard.classList.add("opened");
             localStorage.lifes = --this.lifes;
             this.lifesContainer.innerHTML = this.lifes;
