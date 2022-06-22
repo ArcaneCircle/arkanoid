@@ -9,12 +9,15 @@
         <script type="module" src="./js/webxdc-scores.js"></script>
     </head>
     <body scroll="no">
-        <canvas id="canvas">Sorry, but your system doesn't support this game, try updating your browser or webview.</canvas>
-        <div id="scoreboard"></div>
-        <div>
-            Level: <span id="level-container"></span>
+        <div id="game">
+            <canvas id="canvas">Sorry, but your system doesn't support this game, try updating your browser or webview.</canvas>
+            <div id="score" class="label"><img src="./images/trophy.svg"/> <span id="score-container"></span></div>
+            <div id="lifes" class="label"><img src="./images/heart.svg"/><span id="lifes-container"></span></div>
+            <div id="level-wrapper">
+                <div id="level" class="label"><img src="./images/game-console.svg"/> <span id="level-container"></span></div>
+            </div>
+            <div id="scoreboard"></div>
         </div>
-        <br/>
         <script type="module" src="./js/levels.js"></script>
         <script type="module" src="./js/arkanoid.js"></script>
     </body>

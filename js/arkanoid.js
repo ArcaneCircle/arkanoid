@@ -94,6 +94,8 @@ function ArkanoidGame(canvas, context) {
         BRICK_HEIGHT = 35,
         BRICK_SCORE = 5;
 
+    this.scoreContainer = document.getElementById("score-container");
+    this.lifesContainer = document.getElementById("lifes-container");
     this.levelContainer = document.getElementById("level-container");
     this.width = Math.max(canvas.width, PADDLE_WIDTH * 3);
     canvas.width = this.width;
@@ -110,6 +112,8 @@ function ArkanoidGame(canvas, context) {
         this.gamePaused = false;
         this.paddle.x = this.width / 2 - PADDLE_WIDTH / 2;
         this.ball.dir = BallDirs.NONE;  // idle state
+        this.scoreContainer.innerHTML = this.score;
+        this.lifesContainer.innerHTML = this.lifes;
         this.initLevel();
     };
 
@@ -202,14 +206,6 @@ function ArkanoidGame(canvas, context) {
             context.font = 'bold 20px Arial';
             context.fillText('Pause', this.width / 2 - 30, this.height / 2);
         }
-
-        context.fillStyle = 'rgb(255,255,220)';
-        context.font = 'bold 15px Arial';
-        context.fillText('Score: ' + this.score, 5, 15);
-
-        context.fillStyle = 'rgb(255,255,220)';
-        context.font = 'bold 15px Arial';
-        context.fillText('Lifes: ' + this.lifes, 5, 35);
     };
 
     this.update = () => {
@@ -257,6 +253,7 @@ function ArkanoidGame(canvas, context) {
             window.navigator.vibrate(100);
             if (scoreboard.innerHTML) scoreboard.classList.add("opened");
             localStorage.lifes = --this.lifes;
+            this.lifesContainer.innerHTML = this.lifes;
             this.ball.speed = BALL_DEFAULT_SPEED;
             if (this.lifes === 0) {
                 window.highscores.setScore(this.score);
@@ -274,6 +271,7 @@ function ArkanoidGame(canvas, context) {
         let levelUp = true;
 
         // collision with brick
+        let collision = 0;
         let oldDir = this.ball.dir;
         let oldX = this.ball.x;
         for (var i = 0; i < this.bricks.bricks.length; i++) {
@@ -290,6 +288,7 @@ function ArkanoidGame(canvas, context) {
                                 brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
+                            collision++;
                         }
                         else if (this.isPointInRect(oldX, this.ball.y - this.ball.speed, brick.x, brick.y, brick.width, brick.height)) {
                             console.log(`collision bottom of brick(${i}, ${j})`);
@@ -300,6 +299,7 @@ function ArkanoidGame(canvas, context) {
                                 brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
+                            collision++;
                         }
                     }
                     else if (oldDir === BallDirs.LEFT + BallDirs.DOWN) {
@@ -312,6 +312,7 @@ function ArkanoidGame(canvas, context) {
                                 brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
+                            collision++;
                         }
                         else if (this.isPointInRect(oldX, this.ball.y + this.ball.speed, brick.x, brick.y, brick.width, brick.height)) {
                             console.log(`collision top of brick(${i}, ${j})`);
@@ -322,6 +323,7 @@ function ArkanoidGame(canvas, context) {
                                 brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
+                            collision++;
                         }
                     }
                     else if (oldDir === BallDirs.RIGHT + BallDirs.UP) {
@@ -334,6 +336,7 @@ function ArkanoidGame(canvas, context) {
                                 brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
+                            collision++;
                         }
                         else if (this.isPointInRect(oldX, this.ball.y - this.ball.speed, brick.x, brick.y, brick.width, brick.height)) {
                             console.log(`collision bottom of brick(${i}, ${j})`);
@@ -344,6 +347,7 @@ function ArkanoidGame(canvas, context) {
                                 brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
+                            collision++;
                         }
                     }
                     else if (oldDir === BallDirs.RIGHT + BallDirs.DOWN) {
@@ -356,6 +360,7 @@ function ArkanoidGame(canvas, context) {
                                 brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
+                            collision++;
                         }
                         else if (this.isPointInRect(oldX, this.ball.y + this.ball.speed, brick.x, brick.y, brick.width, brick.height)) {
                             console.log(`collision top of brick(${i}, ${j})`);
@@ -366,6 +371,7 @@ function ArkanoidGame(canvas, context) {
                                 brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
+                            collision++;
                         }
                     }
 
@@ -381,10 +387,17 @@ function ArkanoidGame(canvas, context) {
             window.highscores.setScore(this.score);
             this.ball.dir = BallDirs.NONE;  // idle state
             this.ball.speed = BALL_DEFAULT_SPEED;
-            if (this.lifes < 10) localStorage.lifes = ++this.lifes;
+            if (this.lifes < 10) {
+                localStorage.lifes = ++this.lifes;
+                this.lifesContainer.innerHTML = this.lifes;
+            }
             localStorage.level = ++this.level;
             localStorage.score = this.score;
             this.initLevel();
+        }
+
+        if (collision) {
+            this.scoreContainer.innerHTML = this.score;
         }
     };
 

@@ -18,15 +18,54 @@ body {
     color: rgb(255,255,220);
     background: #000000;
     font-family: Arial;
-    font-weight: bold;
     overflow: hidden;
+}
+
+#game {
+    display: inline-block;
+    position: relative;
 }
 
 #canvas {
     border: solid 1px gray;
 }
 
+.label {
+    position: absolute;
+    display: inline-block;
+    z-index: 10;
+    padding: 0.2em;
+    border-radius: 0.3em;
+    background: rgba(0,0,0,0.3);
+}
+
+.label img {
+    width: 15px;
+}
+
+#level-wrapper {
+    position: absolute;
+    text-align: center;
+    width: 30%;
+    top: 0.1em;
+    left: 35%;
+}
+#level {
+    position: relative;
+}
+
+#score {
+    top: 0.1em;
+    left: 0.1em;
+}
+
+#lifes {
+    top: 0.1em;
+    right: 0.1em;
+}
+
 #scoreboard {
+    font-weight: bold;
     position: absolute;
     background: rgba(0,0,0,0.3);
     border-radius: 0.3em;
