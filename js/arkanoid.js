@@ -264,7 +264,6 @@ function ArkanoidGame(canvas, context) {
             this.lifesContainer.innerHTML = this.lifes;
             this.ball.speed = BALL_DEFAULT_SPEED;
             if (this.lifes === 0) {
-                localStorage.score = parseInt(localStorage.levelScore) || 0;
                 localStorage.timer = new Date().getTime() + LIFE_REGEN;
                 this.init();
             } else {
@@ -390,7 +389,7 @@ function ArkanoidGame(canvas, context) {
         if (levelUp) {
             sfxWin.play();
             window.highscores.setScore(this.score);
-            localStorage.levelScore = this.score;
+            localStorage.score = this.score;
             this.ball.dir = BallDirs.NONE;  // idle state
             this.ball.speed = BALL_DEFAULT_SPEED;
             if (this.lifes < 5) {
@@ -401,7 +400,7 @@ function ArkanoidGame(canvas, context) {
         }
 
         if (collision) {
-            this.scoreContainer.innerHTML = localStorage.score = this.score;
+            this.scoreContainer.innerHTML = this.score;
         }
     };
 
@@ -501,7 +500,6 @@ function ArkanoidGame(canvas, context) {
         clearInterval(this.interval);
         localStorage.timer = 0;
         localStorage.score = 0;
-        localStorage.levelScore = 0;
         localStorage.level = 1;
         localStorage.lifes = INITIAL_LIFES;
         this.setTimerVisibility(false);
