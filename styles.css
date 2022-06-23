@@ -7,6 +7,9 @@
     cursor: none;
     -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
+.dead, .dead * {
+    cursor: default;
+}
 
 html, body {
     padding: 0;
@@ -15,7 +18,7 @@ html, body {
 
 body {
     padding: 5px;
-    color: rgb(255,255,220);
+    color: #ffffdc;
     background: #000000;
     font-family: Arial;
     overflow: hidden;
@@ -67,9 +70,9 @@ body {
 #timer-wrapper {
     position: absolute;
     text-align: center;
-    width: 50%;
-    bottom: 0.5em;
-    left: 25%;
+    width: 90%;
+    bottom: 0.6em;
+    left: 5%;
     visibility:hidden;
     overflow:hidden;
     max-height:0;
@@ -78,6 +81,19 @@ body {
 }
 #timer {
     position: relative;
+}
+#timer img {
+    animation: blink normal 2s infinite ease-in-out;
+}
+
+#restart {
+    position: relative;
+    border: solid 1px #ffffdc;
+    text-decoration: none;
+    color: #ffffdc;
+}
+#restart, #restart * {
+    cursor: pointer;
 }
 
 #scoreboard {
@@ -96,10 +112,22 @@ body {
     transition:opacity .2s ease-in,max-height .4s ease-in
 }
 
-#scoreboard.opened, #timer-wrapper.opened {
+#scoreboard.opened, .dead #timer-wrapper {
     opacity: 1;
     visibility: visible;
     max-height: 1000px
+}
+
+@keyframes blink {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.3;
+    }
+    100% {
+        opacity: 1;
+    }
 }
 
 /* webxdc-scores.js styles */
@@ -113,7 +141,7 @@ body {
 
 .score-row.you {
     color: #222;
-    background: rgb(255,255,220);
+    background: #ffffdc;
 }
 
 .row-pos {
