@@ -11,7 +11,9 @@
   ],
   "force": true,
   "ignoreEntries": [
-    "*.map"
+    "*.map",
+    "*~",
+    "images/*.svg"
   ],
   "mode": "add",
   "outputEntry": "dist/app.xdc",
