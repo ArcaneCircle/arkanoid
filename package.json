@@ -13,7 +13,7 @@
     "concurrently": "^7.2.2",
     "eruda": "^2.4.1",
     "vite": "^2.9.9",
-    "webxdc-dev": "^0.7.0"
+    "webxdc-dev": "^0.8.0"
   },
   "dependencies": {
     "howler": "^2.2.3"

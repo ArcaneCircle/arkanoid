@@ -6,7 +6,7 @@ specifiers:
   eruda: ^2.4.1
   howler: ^2.2.3
   vite: ^2.9.9
-  webxdc-dev: ^0.7.0
+  webxdc-dev: ^0.8.0
 
 dependencies:
   howler: 2.2.3
@@ -16,7 +16,7 @@ devDependencies:
   concurrently: 7.2.2
   eruda: 2.4.1
   vite: 2.9.9
-  webxdc-dev: 0.7.0
+  webxdc-dev: 0.8.0
 
 packages:
 
@@ -1360,8 +1360,8 @@ packages:
       fsevents: 2.3.2
     dev: true
 
-  /webxdc-dev/0.7.0:
-    resolution: {integrity: sha512-A/BoKKEokqLt4wbXf3uZYwdTd5FUsvNreVxdpa8u62zewVTHeZcaP7utw5Vo8RpjhYeryF4njH5loi1nCGxpjQ==}
+  /webxdc-dev/0.8.0:
+    resolution: {integrity: sha512-ouCRGb1aQEMJzLj8YEWwXPp+HLvDloTJR6/lCOsm2px0vhJpmZNJS3UWP/M9glVwDjiGYeExdM2xBn7L05+9jw==}
     hasBin: true
     dependencies:
       '@hope-ui/solid': 0.6.2_cwrltxoomuaycnxr2lk26m3t7u
