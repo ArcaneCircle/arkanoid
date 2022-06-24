@@ -4,9 +4,7 @@
   "scripts": {
     "dev": "concurrently \"vite --host\" \"webxdc-dev run http://localhost:3000\"",
     "dev-xdc": "pnpm build && webxdc-dev run dist/app.xdc",
-    "dev-vite": "vite --host --open",
-    "build": "vite build && jszip-cli -c jszip.config.json",
-    "preview": "vite preview"
+    "build": "vite build && jszip-cli -c jszip.config.json"
   },
   "devDependencies": {
     "@ffflorian/jszip-cli": "^3.1.6",
