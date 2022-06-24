@@ -93,7 +93,7 @@ function ArkanoidGame(canvas, context) {
         BRICK_HEIGHT = 35,
         BRICK_SCORE = 5,
         INITIAL_LIFES = 3,
-        LIFE_REGEN = 1000*60*60*4;
+        LIFE_REGEN = 1000*60*60*3;
 
     this.scoreboard = document.getElementById("scoreboard");
     this.body = document.getElementsByTagName("body")[0];
@@ -426,7 +426,7 @@ function ArkanoidGame(canvas, context) {
             let distance = timer - now;
             if (distance < 0) {
                 localStorage.timer = 0;
-                localStorage.lifes = 1;
+                localStorage.lifes = INITIAL_LIFES;
                 clearInterval(this.interval);
                 this.interval = null;
                 this.setTimerVisibility(false);
