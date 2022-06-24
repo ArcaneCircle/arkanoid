@@ -100,7 +100,7 @@ body {
     position: absolute;
     top: 15%;
     left: 5%;
-    height: 70%;
+    max-height: 70%;
     width: 90%;
     font-weight: bold;
     background: rgba(0,0,0,0.3);

@@ -120,7 +120,7 @@ function ArkanoidGame(canvas, context) {
     };
 
     this.initLevel = () => {
-        if (this.scoreboard.innerHTML) this.scoreboard.classList.add("opened");
+        this.scoreboard.classList.add("opened");
         this.levelContainer.innerHTML = this.level;
         let level = this.level;
         if (level >= 60) level = (level % 60) + 2;
@@ -259,7 +259,6 @@ function ArkanoidGame(canvas, context) {
             } catch (e) {
                 console.error(e);
             }
-            if (this.scoreboard.innerHTML) this.scoreboard.classList.add("opened");
             localStorage.lifes = --this.lifes;
             this.lifesContainer.innerHTML = this.lifes;
             this.ball.speed = BALL_DEFAULT_SPEED;
@@ -269,6 +268,7 @@ function ArkanoidGame(canvas, context) {
                 this.init();
             } else {
                 this.ball.dir = BallDirs.NONE;  // idle state
+                this.scoreboard.classList.add("opened");
             }
             return;
         }
