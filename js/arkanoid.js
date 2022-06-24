@@ -129,9 +129,9 @@ function ArkanoidGame(canvas, context) {
             let brick_width = Math.round(this.width/level[0].length);
             this.bricks = new Bricks(level[0].length, level.length, brick_width, BRICK_HEIGHT, level);
         } else {
-            let cols = 6 + getRandomInt(0, level < 10? 1 : 3);
+            let cols = 6 + getRandomInt(0, level < 20? 1 : 3);
             let brick_width = Math.round(this.width/cols);
-            let offset = getRandomInt(0, 1);
+            let offset = level < 20? 1: getRandomInt(0, 1);
             let rows = (level < 20? 5 : getRandomInt(6, 11)) + offset;
             this.bricks = new Bricks(cols, rows, brick_width, BRICK_HEIGHT);
 
