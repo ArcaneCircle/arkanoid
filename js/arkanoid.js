@@ -264,6 +264,7 @@ function ArkanoidGame(canvas, context) {
             this.lifesContainer.innerHTML = this.lifes;
             this.ball.speed = BALL_DEFAULT_SPEED;
             if (this.lifes === 0) {
+                window.highscores.setScore(this.score);
                 localStorage.timer = new Date().getTime() + LIFE_REGEN;
                 this.init();
             } else {
