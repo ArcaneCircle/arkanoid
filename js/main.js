@@ -428,6 +428,7 @@ function ArkanoidGame(canvas, context) {
         context.clearRect(0, 0, this.width, this.height);
         this.update();
         this.draw();
+        window.requestAnimationFrame(this.render);
     };
 
     this.updateTimer = () => {
@@ -552,8 +553,7 @@ function setup() {
     if (canvas.getContext) {
         arkanoidGame = new ArkanoidGame(canvas, canvas.getContext('2d'));
         arkanoidGame.init();
-
-        setInterval(arkanoidGame.render, 1000 / 60);
+        window.requestAnimationFrame(arkanoidGame.render);
     }
 }
 
