@@ -116,6 +116,13 @@ function ArkanoidGame(canvas, context) {
         this.paddle.x = this.width / 2 - PADDLE_WIDTH / 2;
         this.ball.dir = BallDirs.NONE;  // idle state
         this.initLevel();
+        let respawn = parseInt(localStorage.respawn) || 0;
+        let now = new Date().getTime();
+        if (respawn > now) {
+            localStorage.lifes = 0;
+            localStorage.timer = now;
+            localStorage.respawn = 0;
+        }
         if (this.lifes === 0) this.interval = setInterval(this.updateTimer, 500);
     };
 
@@ -426,6 +433,7 @@ function ArkanoidGame(canvas, context) {
             let distance = timer - now;
             if (distance < 0) {
                 localStorage.timer = 0;
+                localStorage.respawn = new Date().getTime();
                 localStorage.lifes = INITIAL_LIFES;
                 clearInterval(this.interval);
                 this.interval = null;
