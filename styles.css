@@ -73,11 +73,11 @@ body {
     width: 90%;
     bottom: 0.6em;
     left: 5%;
-    visibility:hidden;
-    overflow:hidden;
-    max-height:0;
-    opacity:0;
-    transition:opacity .2s ease-in,max-height .4s ease-in
+    visibility: hidden;
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: opacity .2s ease-in,max-height .4s ease-in
 }
 #timer {
     position: relative;
@@ -104,11 +104,11 @@ body {
     font-weight: bold;
     background: rgba(0,0,0,0.3);
     border-radius: 0.3em;
-    visibility:hidden;
-    overflow:auto;
-    max-height:0;
-    opacity:0;
-    transition:opacity .2s ease-in,max-height .4s ease-in
+    visibility: hidden;
+    overflow: auto;
+    max-height: 0;
+    opacity: 0;
+    transition: opacity .2s ease-in,max-height .4s ease-in
 }
 
 #scoreboard.opened, .dead #timer-wrapper {
