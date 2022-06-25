@@ -100,7 +100,6 @@ body {
     position: absolute;
     top: 15%;
     left: 5%;
-    max-height: 70%;
     width: 90%;
     font-weight: bold;
     background: rgba(0,0,0,0.3);
@@ -115,7 +114,7 @@ body {
 #scoreboard.opened, .dead #timer-wrapper {
     opacity: 1;
     visibility: visible;
-    max-height: 1000px
+    max-height: 70%;
 }
 
 @keyframes blink {
