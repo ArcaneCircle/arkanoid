@@ -244,7 +244,7 @@ function ArkanoidGame(canvas, context) {
                 this.ball.changeDir(BallDirs.UP);
                 this.ball.y = this.paddle.y - this.ball.radius;
                 // avoid infinite bouncing loops
-                this.ball.x += (this.ball.x > this.paddle.x + this.paddle.width/2)? -10 : 10;
+                this.ball.x += ((this.ball.x > this.paddle.x + this.paddle.width/2)? -1 : 1) * this.ball.radius*2;
             }
         }
 
@@ -300,7 +300,9 @@ function ArkanoidGame(canvas, context) {
                             sfxBounce.play();
                             this.ball.x = brick.x + brick.width + this.ball.radius;
                             this.ball.changeDir(BallDirs.RIGHT);
-                            if (brick.lifes > 0) {
+                            if (brick.lifes === -1) {
+                                this.ball.x += getRandomInt(0, this.ball.radius*2);
+                            } else {
                                 brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
@@ -311,7 +313,9 @@ function ArkanoidGame(canvas, context) {
                             sfxBounce.play();
                             this.ball.y = brick.y + brick.height + this.ball.radius;
                             this.ball.changeDir(BallDirs.DOWN);
-                            if (brick.lifes > 0) {
+                            if (brick.lifes === -1) {
+                                this.ball.y += getRandomInt(0, this.ball.radius*2);
+                            } else {
                                 brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
@@ -324,7 +328,9 @@ function ArkanoidGame(canvas, context) {
                             sfxBounce.play();
                             this.ball.x = brick.x + brick.width + this.ball.radius;
                             this.ball.changeDir(BallDirs.RIGHT);
-                            if (brick.lifes > 0) {
+                            if (brick.lifes === -1) {
+                                this.ball.x += getRandomInt(0, this.ball.radius*2);
+                            } else {
                                 brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
@@ -335,7 +341,9 @@ function ArkanoidGame(canvas, context) {
                             sfxBounce.play();
                             this.ball.y = brick.y - this.ball.radius;
                             this.ball.changeDir(BallDirs.UP);
-                            if (brick.lifes > 0) {
+                            if (brick.lifes === -1) {
+                                this.ball.y -= getRandomInt(0, this.ball.radius*2);
+                            } else {
                                 brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
@@ -348,7 +356,9 @@ function ArkanoidGame(canvas, context) {
                             sfxBounce.play();
                             this.ball.x = brick.x - this.ball.radius;
                             this.ball.changeDir(BallDirs.LEFT);
-                            if (brick.lifes > 0) {
+                            if (brick.lifes === -1) {
+                                this.ball.x -= getRandomInt(0, this.ball.radius*2);
+                            } else {
                                 brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
@@ -359,7 +369,9 @@ function ArkanoidGame(canvas, context) {
                             sfxBounce.play();
                             this.ball.y = brick.y + brick.height + this.ball.radius;
                             this.ball.changeDir(BallDirs.DOWN);
-                            if (brick.lifes > 0) {
+                            if (brick.lifes === -1) {
+                                this.ball.y += getRandomInt(0, this.ball.radius*2);
+                            } else {
                                 brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
@@ -372,7 +384,9 @@ function ArkanoidGame(canvas, context) {
                             sfxBounce.play();
                             this.ball.x = brick.x - this.ball.radius;
                             this.ball.changeDir(BallDirs.LEFT);
-                            if (brick.lifes > 0) {
+                            if (brick.lifes === -1) {
+                                this.ball.x -= getRandomInt(0, this.ball.radius*2);
+                            } else {
                                 brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
@@ -383,7 +397,9 @@ function ArkanoidGame(canvas, context) {
                             sfxBounce.play();
                             this.ball.y = brick.y - this.ball.radius;
                             this.ball.changeDir(BallDirs.UP);
-                            if (brick.lifes > 0) {
+                            if (brick.lifes === -1) {
+                                this.ball.y -= getRandomInt(0, this.ball.radius*2);
+                            } else {
                                 brick.lifes--;
                                 this.score += BRICK_SCORE;
                             }
