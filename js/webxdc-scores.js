@@ -23,6 +23,9 @@ window.highscores = (() => {
     }
 
     function getHighScores() {
+        if(!window.webxdc){
+            return [{current: false, score:500, name: "window.webxdc not found"}]
+        }
         const selfAddr = window.webxdc.selfAddr;
         const scores = Object.keys(players).map((addr) => {
             return {
@@ -66,6 +69,9 @@ window.highscores = (() => {
             }
             players = JSON.parse(localStorage.getItem(playersKey) || "{}");
             updateScoreboard();
+            if (!window.webxdc) {
+                return Promise.resolve()
+            }
             return window.webxdc.setUpdateListener((update) => {
                 const player = update.payload;
                 if (player.force || player.score > getScore(player.addr)) {
@@ -80,10 +86,12 @@ window.highscores = (() => {
         },
 
         getScore: () => {
+            if(!window.webxdc){return 0}
             return getScore(window.webxdc.selfAddr);
         },
 
         setScore: (score, force = false) => {
+            if(!window.webxdc){return}
             const addr = window.webxdc.selfAddr;
             const old_score = getScore(addr);
             if (score > old_score || force) {
