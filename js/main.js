@@ -1,13 +1,16 @@
+//@ts-check
 import "../styles.css"
 
 import "./webxdc-scores.js"
 import "./levels.js"
+import { Flags, SELF_HEALING_REGEN_TIME } from "./constants";
 import {Howl} from 'howler';
 
 let arkanoidGame,
     imgBall,
     imgPaddle,
     imgBricks,
+    imgSelfHealingBricks,
     sfxBounce,
     sfxHit,
     sfxWin;
@@ -64,20 +67,58 @@ function Ball(x, y, radius, dir, speed) {
     };
 }
 
-function Brick(x, y, width, height, type) {
+function Brick(x, y, width, height, lifes, flags = 0) {
     this.x = x;
     this.y = y;
     this.width = width;
     this.height = height;
-    this.lifes = type;
+    this.lifes = lifes;
+    this.original_lifes = lifes;
+    this.flags = flags
+
+    // decoded flags
+    this.is_self_healing = this.flags & Flags.SELF_HEALING
+    this.has_2x_score = this.flags & Flags.SCORE_X2
+
+    // functions:
+    this._regen_timeout = null;
+    this._regenerate = () => {
+      // I know that this does not respect pauses, we'd need some game tick system for that
+      if (this.lifes < this.original_lifes && this.lifes > 0) {
+        this.lifes++;
+        if (this.lifes > this.original_lifes) {
+          this._regen_timeout = setTimeout(
+            this._regenerate,
+            SELF_HEALING_REGEN_TIME
+          );
+        }
+      } else if (this._regen_timeout) {
+        clearTimeout(this._regen_timeout);
+        this._regen_timeout = null;
+      }
+    };
+    this.damage = () => {
+      this.lifes--;
+      if (this.is_self_healing && this.lifes < this.original_lifes) {
+        if (this._regen_timeout) {
+          clearTimeout(this._regen_timeout);
+          this._regen_timeout = null;
+        }
+        this._regen_timeout = setTimeout(
+          this._regenerate,
+          SELF_HEALING_REGEN_TIME
+        );
+      }
+    };
 }
 
-function Bricks(hor_num, vert_num, brick_width, brick_height, level) {
+function Bricks(hor_num, vert_num, brick_width, brick_height, level, level_flags=[]) {
     this.bricks = new Array();
-    for (var i = 0; i < vert_num; i++) {
-        this.bricks[i] = new Array();
-        for (var j = 0; j < hor_num; j++) {
-            this.bricks[i][j] = new Brick(j * brick_width, i * brick_height, brick_width, brick_height, level? level[i][j]: 0);
+    for (var y = 0; y < vert_num; y++) {
+        this.bricks[y] = new Array();
+        for (var x = 0; x < hor_num; x++) {
+            let flags = !level_flags ? 0 : (level_flags.find(b=>b.x === x && b.y === y) || {}).f || 0
+            this.bricks[y][x] = new Brick(x * brick_width, y * brick_height, brick_width, brick_height, level? level[y][x]: 0, flags);
         }
     }
 }
@@ -136,9 +177,10 @@ function ArkanoidGame(canvas, context) {
         let level = this.level;
         if (level >= 60) level = (level % 60) + 2;
         if (window.levels[level]) {
-            level = window.levels[level];
-            let brick_width = Math.round(this.width/level[0].length);
-            this.bricks = new Bricks(level[0].length, level.length, brick_width, BRICK_HEIGHT, level);
+            let level_flags = window.levels["flags_"+level] || [];
+            let level_content = window.levels[level];
+            let brick_width = Math.round(this.width/level_content[0].length);
+            this.bricks = new Bricks(level_content[0].length, level_content.length, brick_width, BRICK_HEIGHT, level_content, level_flags);
         } else {
             let cols = 6 + getRandomInt(0, level < 20? 1 : 3);
             let brick_width = Math.round(this.width/cols);
@@ -196,9 +238,11 @@ function ArkanoidGame(canvas, context) {
             for (var j = 0; j < this.bricks.bricks[i].length; j++) {
                 let brick = this.bricks.bricks[i][j];
                 let lifes = brick.lifes;
+                // console.log("bt", brick_type)
                 if (lifes !== 0) {
                     if (lifes === -1) {lifes = 0;}
-                    context.drawImage(imgBricks,
+                    let img = brick.is_self_healing ? imgSelfHealingBricks : imgBricks
+                    context.drawImage(img,
                                       0, lifes * 45, BRICK_WIDTH, 45,
                                       brick.x, brick.y, brick.width, brick.height);
                 }
@@ -222,6 +266,15 @@ function ArkanoidGame(canvas, context) {
             context.fillText('Pause', this.width / 2 - 30, this.height / 2);
         }
     };
+
+    this.damageBrick = (brick) => {
+        brick.damage()
+        if (brick.has_2x_score){
+            this.score += BRICK_SCORE * 2;
+        } else {
+            this.score += BRICK_SCORE;
+        }
+    }
 
     this.update = () => {
         if (this.gamePaused || !this.lifes || this.ball.dir === BallDirs.NONE) return;
@@ -301,10 +354,10 @@ function ArkanoidGame(canvas, context) {
                             this.ball.x = brick.x + brick.width + this.ball.radius;
                             this.ball.changeDir(BallDirs.RIGHT);
                             if (brick.lifes === -1) {
+                                // Indestructible brick
                                 this.ball.x += getRandomInt(0, this.ball.radius*2);
                             } else {
-                                brick.lifes--;
-                                this.score += BRICK_SCORE;
+                                this.damageBrick(brick)
                             }
                             collision++;
                         }
@@ -314,10 +367,10 @@ function ArkanoidGame(canvas, context) {
                             this.ball.y = brick.y + brick.height + this.ball.radius;
                             this.ball.changeDir(BallDirs.DOWN);
                             if (brick.lifes === -1) {
+                                // Indestructible brick
                                 this.ball.y += getRandomInt(0, this.ball.radius*2);
                             } else {
-                                brick.lifes--;
-                                this.score += BRICK_SCORE;
+                                this.damageBrick(brick)
                             }
                             collision++;
                         }
@@ -329,10 +382,10 @@ function ArkanoidGame(canvas, context) {
                             this.ball.x = brick.x + brick.width + this.ball.radius;
                             this.ball.changeDir(BallDirs.RIGHT);
                             if (brick.lifes === -1) {
+                                // Indestructible brick
                                 this.ball.x += getRandomInt(0, this.ball.radius*2);
                             } else {
-                                brick.lifes--;
-                                this.score += BRICK_SCORE;
+                                this.damageBrick(brick)
                             }
                             collision++;
                         }
@@ -344,8 +397,7 @@ function ArkanoidGame(canvas, context) {
                             if (brick.lifes === -1) {
                                 this.ball.y -= getRandomInt(0, this.ball.radius*2);
                             } else {
-                                brick.lifes--;
-                                this.score += BRICK_SCORE;
+                                this.damageBrick(brick)
                             }
                             collision++;
                         }
@@ -359,8 +411,7 @@ function ArkanoidGame(canvas, context) {
                             if (brick.lifes === -1) {
                                 this.ball.x -= getRandomInt(0, this.ball.radius*2);
                             } else {
-                                brick.lifes--;
-                                this.score += BRICK_SCORE;
+                                this.damageBrick(brick)
                             }
                             collision++;
                         }
@@ -372,8 +423,7 @@ function ArkanoidGame(canvas, context) {
                             if (brick.lifes === -1) {
                                 this.ball.y += getRandomInt(0, this.ball.radius*2);
                             } else {
-                                brick.lifes--;
-                                this.score += BRICK_SCORE;
+                                this.damageBrick(brick)
                             }
                             collision++;
                         }
@@ -387,8 +437,7 @@ function ArkanoidGame(canvas, context) {
                             if (brick.lifes === -1) {
                                 this.ball.x -= getRandomInt(0, this.ball.radius*2);
                             } else {
-                                brick.lifes--;
-                                this.score += BRICK_SCORE;
+                                this.damageBrick(brick)
                             }
                             collision++;
                         }
@@ -400,8 +449,7 @@ function ArkanoidGame(canvas, context) {
                             if (brick.lifes === -1) {
                                 this.ball.y -= getRandomInt(0, this.ball.radius*2);
                             } else {
-                                brick.lifes--;
-                                this.score += BRICK_SCORE;
+                                this.damageBrick(brick)
                             }
                             collision++;
                         }
@@ -544,6 +592,7 @@ function ArkanoidGame(canvas, context) {
 
 function loadAssets() {
     imgBricks = new Image(); imgBricks.src = "./images/bricks.png";
+    imgSelfHealingBricks = new Image(); imgSelfHealingBricks.src = "./images/self_healing_bricks.png";
     imgPaddle = new Image(); imgPaddle.src = "./images/paddle.png";
     imgBall = new Image(); imgBall.src = "./images/ball.png";
 
