@@ -3,7 +3,7 @@ import "../styles.css"
 
 import "./webxdc-scores.js"
 import "./levels.js"
-import { Flags, SELF_HEALING_REGEN_TIME } from "./constants";
+import { Flags, SELF_HEALING_REGEN_TIME, TNT_FULL_DAMAGE } from "./constants";
 import {Howl} from 'howler';
 
 let arkanoidGame,
@@ -11,6 +11,7 @@ let arkanoidGame,
     imgPaddle,
     imgBricks,
     imgSelfHealingBricks,
+    imgExplodingBricks,
     sfxBounce,
     sfxHit,
     sfxWin;
@@ -79,6 +80,7 @@ function Brick(x, y, width, height, lifes, flags = 0) {
     // decoded flags
     this.is_self_healing = this.flags & Flags.SELF_HEALING
     this.has_2x_score = this.flags & Flags.SCORE_X2
+    this.is_exploding = this.flags & Flags.EXPLODING
 
     // functions:
     this._regen_timeout = null;
@@ -97,8 +99,8 @@ function Brick(x, y, width, height, lifes, flags = 0) {
         this._regen_timeout = null;
       }
     };
-    this.damage = () => {
-      this.lifes--;
+    this.damage = (hits = 1) => {
+      this.lifes = Math.max(0, this.lifes-hits);
       if (this.is_self_healing && this.lifes < this.original_lifes) {
         if (this._regen_timeout) {
           clearTimeout(this._regen_timeout);
@@ -242,6 +244,9 @@ function ArkanoidGame(canvas, context) {
                 if (lifes !== 0) {
                     if (lifes === -1) {lifes = 0;}
                     let img = brick.is_self_healing ? imgSelfHealingBricks : imgBricks
+                    if (brick.is_exploding){
+                        img = imgExplodingBricks
+                    }
                     context.drawImage(img,
                                       0, lifes * 45, BRICK_WIDTH, 45,
                                       brick.x, brick.y, brick.width, brick.height);
@@ -267,14 +272,54 @@ function ArkanoidGame(canvas, context) {
         }
     };
 
-    this.damageBrick = (brick) => {
-        brick.damage()
+    this.damageBrick = (brick, x, y, damage_hits = 1) => {
+        brick.damage(damage_hits)
         if (brick.lifes <= 0) {
+            // brick is destroyed
             let points = BRICK_SCORE * brick.original_lifes
             if (brick.has_2x_score){
                 points *= 2;
             } 
             this.score += points
+
+            if (brick.is_exploding) {
+                // console.log("ex", {x,y});
+                const explode_brick = (x,y, damage_hits=1)=>{
+                    // console.log({x,y}, this.bricks.bricks);
+                    const brick = this.bricks.bricks[x][y]
+                    if(brick && brick.lifes !== 0) this.damageBrick(brick, x, y, damage_hits)
+                }
+                // TODO: draw explosion effect and play sound
+                // TNT damages blocks around it, the near blocks get full damage, the other get weak damage
+                // damage radius:
+                // [1][X][1]
+                // [X] X [X]
+                // [1][X][1]
+                if (x >= 1){
+                    explode_brick(x-1,y,TNT_FULL_DAMAGE)
+                    if (y > 1){
+                        explode_brick(x-1,y-1)
+                    }
+                    if ((y+1) <= this.bricks.bricks[0].length -1){
+                        explode_brick(x-1,y+1)
+                    }
+                }
+                if ((x+1) <= this.bricks.bricks.length-1){
+                    explode_brick(x+1,y,TNT_FULL_DAMAGE)
+                    if (y > 1){
+                        explode_brick(x+1,y-1)
+                    }
+                    if ((y+1) <= this.bricks.bricks[0].length - 1){
+                        explode_brick(x+1,y+1)
+                    }
+                }
+                if (y > 1){
+                    explode_brick(x,y-1, TNT_FULL_DAMAGE)
+                }
+                if ((y+1) <= this.bricks.bricks[0].length-1){
+                    explode_brick(x,y+1, TNT_FULL_DAMAGE)
+                }
+            }
         }
     }
 
@@ -359,7 +404,7 @@ function ArkanoidGame(canvas, context) {
                                 // Indestructible brick
                                 this.ball.x += getRandomInt(0, this.ball.radius*2);
                             } else {
-                                this.damageBrick(brick)
+                                this.damageBrick(brick, i, j)
                             }
                             collision++;
                         }
@@ -372,7 +417,7 @@ function ArkanoidGame(canvas, context) {
                                 // Indestructible brick
                                 this.ball.y += getRandomInt(0, this.ball.radius*2);
                             } else {
-                                this.damageBrick(brick)
+                                this.damageBrick(brick, i, j)
                             }
                             collision++;
                         }
@@ -387,7 +432,7 @@ function ArkanoidGame(canvas, context) {
                                 // Indestructible brick
                                 this.ball.x += getRandomInt(0, this.ball.radius*2);
                             } else {
-                                this.damageBrick(brick)
+                                this.damageBrick(brick, i, j)
                             }
                             collision++;
                         }
@@ -399,7 +444,7 @@ function ArkanoidGame(canvas, context) {
                             if (brick.lifes === -1) {
                                 this.ball.y -= getRandomInt(0, this.ball.radius*2);
                             } else {
-                                this.damageBrick(brick)
+                                this.damageBrick(brick, i, j)
                             }
                             collision++;
                         }
@@ -413,7 +458,7 @@ function ArkanoidGame(canvas, context) {
                             if (brick.lifes === -1) {
                                 this.ball.x -= getRandomInt(0, this.ball.radius*2);
                             } else {
-                                this.damageBrick(brick)
+                                this.damageBrick(brick, i, j)
                             }
                             collision++;
                         }
@@ -425,7 +470,7 @@ function ArkanoidGame(canvas, context) {
                             if (brick.lifes === -1) {
                                 this.ball.y += getRandomInt(0, this.ball.radius*2);
                             } else {
-                                this.damageBrick(brick)
+                                this.damageBrick(brick, i, j)
                             }
                             collision++;
                         }
@@ -439,7 +484,7 @@ function ArkanoidGame(canvas, context) {
                             if (brick.lifes === -1) {
                                 this.ball.x -= getRandomInt(0, this.ball.radius*2);
                             } else {
-                                this.damageBrick(brick)
+                                this.damageBrick(brick, i, j)
                             }
                             collision++;
                         }
@@ -451,7 +496,7 @@ function ArkanoidGame(canvas, context) {
                             if (brick.lifes === -1) {
                                 this.ball.y -= getRandomInt(0, this.ball.radius*2);
                             } else {
-                                this.damageBrick(brick)
+                                this.damageBrick(brick, i, j)
                             }
                             collision++;
                         }
@@ -595,6 +640,7 @@ function ArkanoidGame(canvas, context) {
 function loadAssets() {
     imgBricks = new Image(); imgBricks.src = "./images/bricks.png";
     imgSelfHealingBricks = new Image(); imgSelfHealingBricks.src = "./images/self_healing_bricks.png";
+    imgExplodingBricks = new Image(); imgExplodingBricks.src = "./images/tnt_bricks.png";
     imgPaddle = new Image(); imgPaddle.src = "./images/paddle.png";
     imgBall = new Image(); imgBall.src = "./images/ball.png";
 

@@ -4,7 +4,11 @@ window.levels = {
         [0, 2, 0, 2, 0, 2, 0],
         [2, 0, 2, 5, 2, 0, 2],
        ],
-    flags_1: [{x:2, y:2, f: 3 /* SELF_HEALING | SCORE_X2 */ }, {x:3, y:2, f: 3 /* SELF_HEALING | SCORE_X2 */}],
+    flags_1: [
+        {x:2, y:2, f: 3 /* SELF_HEALING | SCORE_X2 */ },
+        {x:3, y:2, f: 3 /* SELF_HEALING | SCORE_X2 */},
+        {x:4, y:2, f: 4 /* EXPLODING */},
+        {x:5, y:1, f: 4 /* EXPLODING */}],
 
     // Small Spaceship 8x9
     2: [[0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -38,8 +42,9 @@ window.levels = {
         [0, 1,  1, 1,  1, 1, 0],
         [0, 1, -1, 0, -1, 1, 0],
         [0, 1,  1, 1,  1, 1, 0],
-        [0, 0,  1, 1,  1, 0, 0],
+        [0, 0,  2, 2,  1, 0, 0],
        ],
+    flags_4: [{x:4, y:9, f: 4 /* EXPLODING */},{x:2, y:9, f: 4 /* EXPLODING */}],
 
     // Tree 9x7
     5: [[0, 0, 0, 0, 0, 0,  0],
