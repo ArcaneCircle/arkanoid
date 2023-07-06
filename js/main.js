@@ -269,10 +269,12 @@ function ArkanoidGame(canvas, context) {
 
     this.damageBrick = (brick) => {
         brick.damage()
-        if (brick.has_2x_score){
-            this.score += BRICK_SCORE * 2;
-        } else {
-            this.score += BRICK_SCORE;
+        if (brick.lifes <= 0) {
+            let points = BRICK_SCORE * brick.original_lifes
+            if (brick.has_2x_score){
+                points *= 2;
+            } 
+            this.score += points
         }
     }
 
