@@ -3,7 +3,7 @@ import "../styles.css"
 
 import "./webxdc-scores.js"
 import "./levels.js"
-import { Flags, SELF_HEALING_REGEN_TIME, TNT_FULL_DAMAGE } from "./constants";
+import { Flags, SELF_HEALING_REGEN_TIME, TNT_EXPLOSION_DURATION, TNT_EXPLOSION_FRAME_DURATION, TNT_FULL_DAMAGE } from "./constants";
 import {Howl} from 'howler';
 import { playExplosionSFX } from "./sfx";
 
@@ -156,7 +156,8 @@ function ArkanoidGame(canvas, context) {
     this.paddle = new Paddle(this.width / 2 - PADDLE_WIDTH / 2, this.height - 18, PADDLE_WIDTH, PADDLE_HEIGHT);
     this.ball = new Ball(this.width / 2, this.height / 2, BALL_RADIUS, BallDirs.NONE, BALL_DEFAULT_SPEED);
     this.bricks = new Bricks(5, 2, BRICK_WIDTH, BRICK_HEIGHT);
-    this.explosionVisuals = [] // [{x:5, y:5}]
+    /** @type {{x: number, y: number, startTime: number, ended?:true}[]} */
+    this.explosionVisuals = [{x:5, y:5, startTime:Date.now()}]
     this.brick_width = 0
     this.brick_height = 0
 
@@ -263,17 +264,24 @@ function ArkanoidGame(canvas, context) {
     };
 
     this.drawExplosions = () => {
+        const now = Date.now()
         for (const explosionVisual of this.explosionVisuals) {
-            const {x, y} = explosionVisual
+            const {x, y, startTime} = explosionVisual
 
             const width = this.brick_width * 3
             const height = this.brick_height * 3
 
+            const animation_time = (now - startTime) % TNT_EXPLOSION_DURATION
+            const frame = Math.floor(animation_time / TNT_EXPLOSION_FRAME_DURATION)
+
+            if(frame == 7){
+                explosionVisual.ended = true
+            }
 
             context.drawImage(
               imgExplosion,
-              0,
-              192,
+              192 * (frame % 4),
+              192 * (Math.floor(frame / 4)),
               192,
               192,
               (this.brick_width * x)- this.brick_width,
@@ -369,6 +377,10 @@ function ArkanoidGame(canvas, context) {
     }
 
     this.update = () => {
+        if(this.explosionVisuals.length !== 0){
+            this.explosionVisuals = this.explosionVisuals.filter(({ended})=>!ended)
+        }
+
         if (this.gamePaused || !this.lifes || this.ball.dir === BallDirs.NONE) return;
 
         // update ball pos

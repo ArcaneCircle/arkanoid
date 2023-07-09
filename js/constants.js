@@ -7,3 +7,6 @@ export const Flags = {
 export const SELF_HEALING_REGEN_TIME = 7777
 
 export const TNT_FULL_DAMAGE = 2
+
+export const TNT_EXPLOSION_DURATION = 260
+export const TNT_EXPLOSION_FRAME_DURATION = TNT_EXPLOSION_DURATION/8 // there are 8 animation frames
