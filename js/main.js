@@ -1,6 +1,6 @@
 import "../styles.css"
 
-import "./webxdc-scores.js"
+import "webxdc-scores"
 import "./levels.js"
 import {Howl} from 'howler';
 
