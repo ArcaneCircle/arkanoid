@@ -13,6 +13,7 @@ let arkanoidGame,
     imgBricks,
     imgSelfHealingBricks,
     imgExplodingBricks,
+    imgExplosion,
     sfxBounce,
     sfxHit,
     sfxWin;
@@ -155,6 +156,9 @@ function ArkanoidGame(canvas, context) {
     this.paddle = new Paddle(this.width / 2 - PADDLE_WIDTH / 2, this.height - 18, PADDLE_WIDTH, PADDLE_HEIGHT);
     this.ball = new Ball(this.width / 2, this.height / 2, BALL_RADIUS, BallDirs.NONE, BALL_DEFAULT_SPEED);
     this.bricks = new Bricks(5, 2, BRICK_WIDTH, BRICK_HEIGHT);
+    this.explosionVisuals = [{x:5, y:5}]
+    this.brick_width = 0
+    this.brick_height = 0
 
     this.init = () => {
         this.level = parseInt(localStorage.level) || 1;
@@ -183,6 +187,8 @@ function ArkanoidGame(canvas, context) {
             let level_flags = window.levels["flags_"+level] || [];
             let level_content = window.levels[level];
             let brick_width = Math.round(this.width/level_content[0].length);
+            this.brick_width = brick_width
+            this.brick_height = BRICK_HEIGHT
             this.bricks = new Bricks(level_content[0].length, level_content.length, brick_width, BRICK_HEIGHT, level_content, level_flags);
         } else {
             let cols = 6 + getRandomInt(0, level < 20? 1 : 3);
@@ -256,6 +262,32 @@ function ArkanoidGame(canvas, context) {
         }
     };
 
+    this.drawExplosions = () => {
+        for (const explosionVisual of this.explosionVisuals) {
+            const {x, y} = explosionVisual
+
+            const width = this.brick_width * 3
+            const height = this.brick_height * 3
+
+
+            context.drawImage(
+              imgExplosion,
+              0,
+              192,
+              192,
+              192,
+              (this.brick_width * x)- this.brick_width,
+              (this.brick_height * y)- this.brick_height,
+              width,
+              height
+            );
+            // context.fillStyle = 'rgb(10,100,0)';
+            // const xx = (this.brick_width * x) - this.brick_width
+            // const yy = (this.brick_height * y)- this.brick_height
+            // context.fillRect(xx, yy, width, height);
+        }
+    }
+
     this.draw = () => {
         context.fillStyle = 'rgb(0,10,0)';
         context.fillRect(0, 0, this.width, this.height);
@@ -264,6 +296,7 @@ function ArkanoidGame(canvas, context) {
             this.drawBall();
             this.drawPaddle();
             this.drawBricks();
+            this.drawExplosions()
         }
 
         if (this.gamePaused) {
@@ -286,7 +319,8 @@ function ArkanoidGame(canvas, context) {
             if (brick.is_exploding) {
                 const explosion = (x,y) => {
                     // console.log("ex", {x,y});
-                    // TODO: draw explosion effect and play sound
+                    // draw explosion effect and play sound
+                    this.explosionVisuals.push({x, y, startTime: Date.now()})
                     playExplosionSFX()
                     // TNT damages blocks around it, the near blocks get full damage, the other get weak damage
                     // damage radius:
@@ -654,6 +688,7 @@ function loadAssets() {
     imgExplodingBricks = new Image(); imgExplodingBricks.src = "./images/tnt_bricks.png";
     imgPaddle = new Image(); imgPaddle.src = "./images/paddle.png";
     imgBall = new Image(); imgBall.src = "./images/ball.png";
+    imgExplosion = new Image(); imgExplosion.src = "./images/explosion.png";
 
     //load audio
     sfxBounce = new Howl({src: ["sounds/bounce.mp3"]});
