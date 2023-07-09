@@ -123,7 +123,7 @@ function Bricks(hor_num, vert_num, brick_width, brick_height, level, level_flags
         this.bricks[y] = new Array();
         for (var x = 0; x < hor_num; x++) {
             let flags = !level_flags ? 0 : (level_flags.find(b=>b.x === x && b.y === y) || {}).f || 0
-            this.bricks[y][x] = new Brick(x * brick_width, y * brick_height, brick_width, brick_height, level? level[y][x]: 0, flags);
+            this.bricks[y][x] = new Brick(x * brick_width, y * brick_height, brick_width, brick_height, level? (level[y][x]||0): 0, flags);
         }
     }
 }
