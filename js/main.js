@@ -5,6 +5,7 @@ import "./webxdc-scores.js"
 import "./levels.js"
 import { Flags, SELF_HEALING_REGEN_TIME, TNT_FULL_DAMAGE } from "./constants";
 import {Howl} from 'howler';
+import { playExplosionSFX } from "./sfx";
 
 let arkanoidGame,
     imgBall,
@@ -286,6 +287,7 @@ function ArkanoidGame(canvas, context) {
                 const explosion = (x,y) => {
                     // console.log("ex", {x,y});
                     // TODO: draw explosion effect and play sound
+                    playExplosionSFX()
                     // TNT damages blocks around it, the near blocks get full damage, the other get weak damage
                     // damage radius:
                     // [1][X][1]
