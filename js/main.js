@@ -3,7 +3,7 @@ import "../styles.css"
 
 import "./webxdc-scores.js"
 import "./levels.js"
-import { Flags, SELF_HEALING_REGEN_TIME, TNT_EXPLOSION_DURATION, TNT_EXPLOSION_FRAME_DURATION, TNT_FULL_DAMAGE } from "./constants";
+import { Flags, SELF_HEALING_REGEN_TIME, TNT_EXPLOSION_DELAY, TNT_EXPLOSION_DURATION, TNT_EXPLOSION_FRAME_DURATION, TNT_FULL_DAMAGE } from "./constants";
 import {Howl} from 'howler';
 import { playExplosionSFX } from "./sfx";
 
@@ -158,7 +158,7 @@ function ArkanoidGame(canvas, context) {
     this.ball = new Ball(this.width / 2, this.height / 2, BALL_RADIUS, BallDirs.NONE, BALL_DEFAULT_SPEED);
     this.bricks = new Bricks(5, 2, BRICK_WIDTH, BRICK_HEIGHT);
     /** @type {{x: number, y: number, startTime: number, ended?:true}[]} */
-    this.explosionVisuals = [{x:5, y:5, startTime:Date.now()}]
+    this.explosionVisuals = [] // [{x:5, y:5, startTime:Date.now()}]
     this.brick_width = 0
     this.brick_height = 0
 
@@ -362,12 +362,12 @@ function ArkanoidGame(canvas, context) {
 
                     const brick = this.bricks.bricks[y][x]
                     if (brick && brick.lifes !== 0) {
+                        if (brick.is_exploding) {
+                            setTimeout(() => {explosion(x,y)}, TNT_EXPLOSION_DELAY)
+                            brick.is_exploding = false
+                        }
                         if (brick.lifes !== -1){
                             this.damageBrick(brick, x, y, damage_hits)
-                        }
-                        if (brick.is_exploding) {
-                            explosion(x,y)
-                            brick.is_exploding = false
                         }
                     }
                 }
@@ -565,6 +565,11 @@ function ArkanoidGame(canvas, context) {
                     }
                 }
             }
+        }
+
+        if(this.explosionVisuals.length !== 0){
+            // don't end level if there are still explosions on the screen
+            levelUp = false;
         }
 
         if (levelUp) {

@@ -10,3 +10,4 @@ export const TNT_FULL_DAMAGE = 2
 
 export const TNT_EXPLOSION_DURATION = 260
 export const TNT_EXPLOSION_FRAME_DURATION = TNT_EXPLOSION_DURATION/8 // there are 8 animation frames
+export const TNT_EXPLOSION_DELAY = 40
