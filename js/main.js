@@ -283,43 +283,38 @@ function ArkanoidGame(canvas, context) {
             this.score += points
 
             if (brick.is_exploding) {
-                // console.log("ex", {x,y});
                 const explosion = (x,y) => {
+                    // console.log("ex", {x,y});
                     // TODO: draw explosion effect and play sound
                     // TNT damages blocks around it, the near blocks get full damage, the other get weak damage
                     // damage radius:
                     // [1][X][1]
                     // [X] X [X]
                     // [1][X][1]
-
-                    if (x >= 1){
-                        explode_brick(x-1,y,TNT_FULL_DAMAGE)
-                        if (y > 1){
-                            explode_brick(x-1,y-1)
-                        }
-                        if ((y+1) <= this.bricks.bricks[0].length -1){
-                            explode_brick(x-1,y+1)
-                        }
-                    }
-                    if ((x+1) <= this.bricks.bricks.length-1){
-                        explode_brick(x+1,y,TNT_FULL_DAMAGE)
-                        if (y > 1){
-                            explode_brick(x+1,y-1)
-                        }
-                        if ((y+1) <= this.bricks.bricks[0].length - 1){
-                            explode_brick(x+1,y+1)
-                        }
-                    }
-                    if (y > 1){
-                        explode_brick(x,y-1, TNT_FULL_DAMAGE)
-                    }
-                    if ((y+1) <= this.bricks.bricks[0].length-1){
-                        explode_brick(x,y+1, TNT_FULL_DAMAGE)
-                    }
+                    explode_brick(x-1, y-1)
+                    explode_brick(x-1, y, TNT_FULL_DAMAGE)
+                    explode_brick(x-1,y+1)
+                    explode_brick(x,y-1, TNT_FULL_DAMAGE)
+                    const brick = this.bricks.bricks[x][y]
+                    if (brick) {brick.damage(TNT_FULL_DAMAGE + 1)}
+                    explode_brick(x,y+1, TNT_FULL_DAMAGE)
+                    explode_brick(x+1,y,TNT_FULL_DAMAGE)
+                    explode_brick(x+1,y-1)
+                    explode_brick(x+1,y+1)
                 }
 
                 const explode_brick = (x, y, damage_hits=1)=>{
                     // console.log({x,y}, this.bricks.bricks);
+                    
+                    if (x < 0 || y < 0) {
+                        return
+                    }
+                    // console.log("x",x, this.bricks.bricks.length, x > this.bricks.bricks.length-1);
+                    // console.log("y", y, this.bricks.bricks[0].length, y > this.bricks.bricks[0].length-1);
+                    if (x > this.bricks.bricks.length-1 || y > this.bricks.bricks[0].length-1) {
+                        return
+                    }
+
                     const brick = this.bricks.bricks[x][y]
                     if (brick && brick.lifes !== 0) {
                         if (brick.lifes !== -1){

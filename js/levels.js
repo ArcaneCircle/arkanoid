@@ -1,15 +1,18 @@
 window.levels = {
-    // First Level  3x7
+    // First Level  4x7
     1: [[0, 0, 0, 0, 0, 0, 0],
         [0, 2, 0, 2, 3, 2, 0],
         [2, 0, 2, 5, 2, 0, -1],
+        [1, 1, 1, 0, 1, 1, 1],
        ],
     flags_1: [
         {x:2, y:2, f: 3 /* SELF_HEALING | SCORE_X2 */ },
         {x:3, y:2, f: 3 /* SELF_HEALING | SCORE_X2 */},
         {x:4, y:2, f: 4 /* EXPLODING */},
         {x:5, y:1, f: 4 /* EXPLODING */},
-        {x:6, y:2, f: 4 /* EXPLODING */}],
+        {x:6, y:2, f: 4 /* EXPLODING */},
+        {x:1, y:3, f: 4 /* EXPLODING */},
+        {x:5, y:3, f: 4 /* EXPLODING */}],
 
     // Small Spaceship 8x9
     2: [[0, 0, 0, 0, 0, 0, 0, 0, 0],
