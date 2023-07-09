@@ -284,41 +284,55 @@ function ArkanoidGame(canvas, context) {
 
             if (brick.is_exploding) {
                 // console.log("ex", {x,y});
-                const explode_brick = (x,y, damage_hits=1)=>{
+                const explosion = (x,y) => {
+                    // TODO: draw explosion effect and play sound
+                    // TNT damages blocks around it, the near blocks get full damage, the other get weak damage
+                    // damage radius:
+                    // [1][X][1]
+                    // [X] X [X]
+                    // [1][X][1]
+
+                    if (x >= 1){
+                        explode_brick(x-1,y,TNT_FULL_DAMAGE)
+                        if (y > 1){
+                            explode_brick(x-1,y-1)
+                        }
+                        if ((y+1) <= this.bricks.bricks[0].length -1){
+                            explode_brick(x-1,y+1)
+                        }
+                    }
+                    if ((x+1) <= this.bricks.bricks.length-1){
+                        explode_brick(x+1,y,TNT_FULL_DAMAGE)
+                        if (y > 1){
+                            explode_brick(x+1,y-1)
+                        }
+                        if ((y+1) <= this.bricks.bricks[0].length - 1){
+                            explode_brick(x+1,y+1)
+                        }
+                    }
+                    if (y > 1){
+                        explode_brick(x,y-1, TNT_FULL_DAMAGE)
+                    }
+                    if ((y+1) <= this.bricks.bricks[0].length-1){
+                        explode_brick(x,y+1, TNT_FULL_DAMAGE)
+                    }
+                }
+
+                const explode_brick = (x, y, damage_hits=1)=>{
                     // console.log({x,y}, this.bricks.bricks);
                     const brick = this.bricks.bricks[x][y]
-                    if(brick && brick.lifes !== 0) this.damageBrick(brick, x, y, damage_hits)
-                }
-                // TODO: draw explosion effect and play sound
-                // TNT damages blocks around it, the near blocks get full damage, the other get weak damage
-                // damage radius:
-                // [1][X][1]
-                // [X] X [X]
-                // [1][X][1]
-                if (x >= 1){
-                    explode_brick(x-1,y,TNT_FULL_DAMAGE)
-                    if (y > 1){
-                        explode_brick(x-1,y-1)
-                    }
-                    if ((y+1) <= this.bricks.bricks[0].length -1){
-                        explode_brick(x-1,y+1)
+                    if (brick && brick.lifes !== 0) {
+                        if (brick.lifes !== -1){
+                            this.damageBrick(brick, x, y, damage_hits)
+                        }
+                        if (brick.is_exploding) {
+                            explosion(x,y)
+                            brick.is_exploding = false
+                        }
                     }
                 }
-                if ((x+1) <= this.bricks.bricks.length-1){
-                    explode_brick(x+1,y,TNT_FULL_DAMAGE)
-                    if (y > 1){
-                        explode_brick(x+1,y-1)
-                    }
-                    if ((y+1) <= this.bricks.bricks[0].length - 1){
-                        explode_brick(x+1,y+1)
-                    }
-                }
-                if (y > 1){
-                    explode_brick(x,y-1, TNT_FULL_DAMAGE)
-                }
-                if ((y+1) <= this.bricks.bricks[0].length-1){
-                    explode_brick(x,y+1, TNT_FULL_DAMAGE)
-                }
+                
+                explosion(x,y)
             }
         }
     }
