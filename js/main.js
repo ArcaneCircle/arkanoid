@@ -102,6 +102,7 @@ function Brick(x, y, width, height, lifes, flags = 0) {
       }
     };
     this.damage = (hits = 1) => {
+      if(this.original_lifes === -1){return}
       this.lifes = Math.max(0, this.lifes-hits);
       if (this.is_self_healing && this.lifes < this.original_lifes) {
         if (this._regen_timeout) {
