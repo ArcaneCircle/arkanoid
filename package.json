@@ -14,6 +14,7 @@
     "webxdc-dev": "^0.8.0"
   },
   "dependencies": {
-    "howler": "^2.2.3"
+    "howler": "^2.2.3",
+    "zzfx": "^1.1.8"
   }
 }
