@@ -14,6 +14,7 @@ let arkanoidGame,
     imgSelfHealingBricks,
     imgExplodingBricks,
     imgExplosion,
+    imgDynamite,
     sfxBounce,
     sfxHit,
     sfxWin;
@@ -260,12 +261,15 @@ function ArkanoidGame(canvas, context) {
                 if (lifes !== 0) {
                     if (lifes === -1) {lifes = 0;}
                     let img = brick.is_self_healing ? imgSelfHealingBricks : imgBricks
-                    if (brick.is_exploding){
-                        img = imgExplodingBricks
-                    }
                     context.drawImage(img,
-                                      0, lifes * 45, BRICK_WIDTH, 45,
-                                      brick.x, brick.y, brick.width, brick.height);
+                        0, lifes * 45, BRICK_WIDTH, 45,
+                        brick.x, brick.y, brick.width, brick.height);
+                    if (brick.is_exploding){
+                        const offset = 5
+                        context.drawImage(imgDynamite,
+                            0, 0, 32, 32,
+                            brick.x+offset, brick.y+offset, brick.width-(offset*2), brick.height-(offset*2));
+                    }
                 }
             }
         }
@@ -785,6 +789,7 @@ function loadAssets() {
     imgPaddle = new Image(); imgPaddle.src = "./images/paddle.png";
     imgBall = new Image(); imgBall.src = "./images/ball.png";
     imgExplosion = new Image(); imgExplosion.src = "./images/explosion.png";
+    imgDynamite = new Image(); imgDynamite.src = "./images/dynamite.png"
 
     //load audio
     sfxBounce = new Howl({src: ["sounds/bounce.mp3"]});
