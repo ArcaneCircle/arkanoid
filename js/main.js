@@ -3,7 +3,7 @@ import "../styles.css"
 
 import "./webxdc-scores.js"
 import "./levels.js"
-import { Flags, SELF_HEALING_REGEN_TIME, TNT_EXPLOSION_DELAY, TNT_EXPLOSION_DURATION, TNT_EXPLOSION_FRAME_DURATION, TNT_FULL_DAMAGE } from "./constants";
+import { DROP_FALL_SPEED, Flags, PADDLE_EXTENSION, SCORE_DROP_AMOUNT, SELF_HEALING_REGEN_TIME, TNT_EXPLOSION_DELAY, TNT_EXPLOSION_DURATION, TNT_EXPLOSION_FRAME_DURATION, TNT_FULL_DAMAGE } from "./constants";
 import {Howl} from 'howler';
 import { playExplosionSFX } from "./sfx";
 
@@ -161,14 +161,17 @@ function ArkanoidGame(canvas, context) {
     this.explosionVisuals = [] // [{x:5, y:5, startTime:Date.now()}]
     this.brick_width = 0
     this.brick_height = 0
+    /** @type {{kind: 'score' | 'biggerPaddle' | 'life', x: number, y: number, removed?: true}[]} */
+    this.drops = []
 
     this.init = () => {
         this.level = parseInt(localStorage.level) || 1;
-        this.lifesContainer.innerHTML = this.lifes = localStorage.lifes? parseInt(localStorage.lifes) : INITIAL_LIFES;
-        this.scoreContainer.innerHTML = this.score = parseInt(localStorage.score) || 0;
+        this.lifesContainer.innerText = this.lifes = localStorage.lifes? parseInt(localStorage.lifes) : INITIAL_LIFES;
+        this.scoreContainer.innerText = this.score = parseInt(localStorage.score) || 0;
         this.gamePaused = false;
         this.paddle.x = this.width / 2 - PADDLE_WIDTH / 2;
         this.ball.dir = BallDirs.NONE;  // idle state
+        this.drops = []
         this.initLevel();
         let respawn = parseInt(localStorage.respawn) || 0;
         let now = new Date().getTime();
@@ -181,8 +184,12 @@ function ArkanoidGame(canvas, context) {
     };
 
     this.initLevel = () => {
+        // reset
+        this.drops = []
+        this.paddle.width = PADDLE_WIDTH
+        // init level
         this.scoreboard.classList.add("opened");
-        this.levelContainer.innerHTML = this.level;
+        this.levelContainer.innerText = this.level;
         let level = this.level;
         if (level >= 60) level = (level % 60) + 2;
         if (window.levels[level]) {
@@ -241,7 +248,7 @@ function ArkanoidGame(canvas, context) {
     };
 
     this.drawPaddle = () => {
-        context.drawImage(imgPaddle, this.paddle.x, this.paddle.y);
+        context.drawImage(imgPaddle, this.paddle.x, this.paddle.y, this.paddle.width, this.paddle.height);
     };
 
     this.drawBricks = () => {
@@ -297,6 +304,57 @@ function ArkanoidGame(canvas, context) {
         }
     }
 
+    this.updateExplosionVisuals = ()=>{
+        if (this.explosionVisuals.length !== 0) {
+            this.explosionVisuals = this.explosionVisuals.filter(({ended})=>!ended)
+        }
+    }
+
+    this.drawDrops = () => {
+        for (const drop of this.drops) {
+            context.fillStyle = 'rgb(60,60,60)';
+            context.fillRect(drop.x-4, drop.y-4, 18, 18);
+            if (drop.kind === 'score'){
+                context.fillStyle = 'rgb(100,100,0)';
+            } else if (drop.kind === 'biggerPaddle') {
+                context.fillStyle = 'rgb(0,100,0)';
+            } else if (drop.kind === 'life') {
+                context.fillStyle = 'rgb(100,0,0)';
+            }
+            context.fillRect(drop.x, drop.y, 10, 10);
+        }
+        // context.fillStyle = 'rgb(0,100,0)';
+        // context.fillRect(this.paddle.x, this.paddle.y, this.paddle.width, this.paddle.height);
+    }
+
+    this.updateDrops = () => {
+        for (const drop of this.drops) {
+            // move down
+            drop.y += DROP_FALL_SPEED
+            // when moved out of screen then delete
+            if(drop.y > this.height + 20 /* make sure it fully falls out of the screen */){
+                drop.removed = true
+            }
+            // if collide with paddle then delete and activate
+            if(this.isPointInRect(drop.x, drop.y, this.paddle.x, this.paddle.y, this.paddle.width, this.paddle.height)){
+                drop.removed = true
+                console.log("collect drop:", drop);
+                // TODO play Sound
+                if (drop.kind === 'score'){
+                    this.score += SCORE_DROP_AMOUNT
+                    this.scoreContainer.innerText = String(this.score);
+                } else if(drop.kind === 'biggerPaddle') {
+                    this.paddle.width = Math.min(this.paddle.width + PADDLE_EXTENSION, Math.min(PADDLE_WIDTH*3, this.width/2.5))
+                } else if(drop.kind === 'life'){
+                    if (this.lifes < 5) {
+                        this.lifesContainer.innerText = localStorage.lifes = ++this.lifes;
+                    }
+                }
+            }
+        }
+        this.drops = this.drops.filter(({removed})=>!removed)
+    }
+
     this.draw = () => {
         context.fillStyle = 'rgb(0,10,0)';
         context.fillRect(0, 0, this.width, this.height);
@@ -306,6 +364,7 @@ function ArkanoidGame(canvas, context) {
             this.drawPaddle();
             this.drawBricks();
             this.drawExplosions()
+            this.drawDrops();
         }
 
         if (this.gamePaused) {
@@ -374,14 +433,26 @@ function ArkanoidGame(canvas, context) {
                 
                 explosion(x,y)
             }
+
+            //TODO if has drop
+            this.spawnDrop(x , y)
         }
     }
 
-    this.update = () => {
-        if(this.explosionVisuals.length !== 0){
-            this.explosionVisuals = this.explosionVisuals.filter(({ended})=>!ended)
+    this.spawnDrop = (brickX, brickY) => {
+        const randomXOffset = (this.brick_width * (Math.random()-0.5)*0.5)
+        const x = ((brickX-0.5) * this.brick_width) + randomXOffset
+        const y = brickY * this.brick_height + (this.brick_height/2)
+        /** @type {(typeof this.drops[0])['kind']} */
+        let kind = Math.random()>0.5?'score':'biggerPaddle'
+        if (Math.random()< 0.2){
+            kind = 'life'
         }
+        this.drops.push({kind, x,y})
+    }
 
+    this.update = () => {
+        this.updateExplosionVisuals()
         if (this.gamePaused || !this.lifes || this.ball.dir === BallDirs.NONE) return;
 
         // update ball pos
@@ -420,8 +491,12 @@ function ArkanoidGame(canvas, context) {
             this.ball.changeDir(BallDirs.DOWN);
         }
 
+        // update/collect drops
+        this.updateDrops()
+
         // lost one life
         if (this.ball.y + this.ball.radius >= this.height) {
+            this.drops = []
             sfxHit.play();
             try {
                 window.navigator.vibrate(100);
@@ -429,7 +504,7 @@ function ArkanoidGame(canvas, context) {
                 console.error(e);
             }
             localStorage.lifes = --this.lifes;
-            this.lifesContainer.innerHTML = this.lifes;
+            this.lifesContainer.innerText = String(this.lifes);
             this.ball.speed = BALL_DEFAULT_SPEED;
             if (this.lifes === 0) {
                 window.highscores.setScore(this.score);
@@ -579,14 +654,14 @@ function ArkanoidGame(canvas, context) {
             this.ball.dir = BallDirs.NONE;  // idle state
             this.ball.speed = BALL_DEFAULT_SPEED;
             if (this.lifes < 5) {
-                this.lifesContainer.innerHTML = localStorage.lifes = ++this.lifes;
+                this.lifesContainer.innerText = localStorage.lifes = ++this.lifes;
             }
             localStorage.level = ++this.level;
             this.initLevel();
         }
 
         if (collision) {
-            this.scoreContainer.innerHTML = this.score;
+            this.scoreContainer.innerText = String(this.score);
         }
     };
 
@@ -627,7 +702,7 @@ function ArkanoidGame(canvas, context) {
             if (minutes < 10) minutes = "0" + minutes;
             let seconds = Math.floor((distance % (1000*60)) / 1000);
             if (seconds < 10) seconds = "0" + seconds;
-            this.timerContainer.innerHTML = `${hours}:${minutes}:${seconds}`;
+            this.timerContainer.innerText = `${hours}:${minutes}:${seconds}`;
             this.setTimerVisibility(true);
         } else {
             this.setTimerVisibility(false);
