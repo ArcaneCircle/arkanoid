@@ -5,7 +5,7 @@ import "./webxdc-scores.js"
 import "./levels.js"
 import { DROP_FALL_SPEED, Flags, PADDLE_EXTENSION, SCORE_DROP_AMOUNT, SELF_HEALING_REGEN_TIME, TNT_EXPLOSION_DELAY, TNT_EXPLOSION_DURATION, TNT_EXPLOSION_FRAME_DURATION, TNT_FULL_DAMAGE } from "./constants";
 import {Howl} from 'howler';
-import { playExplosionSFX } from "./sfx";
+import { playExplosionSFX, playPickupSoundBonusScore, playPickupSoundExtraLife, playPickupSoundPaddleExtension } from "./sfx";
 
 let arkanoidGame,
     imgBall,
@@ -341,11 +341,14 @@ function ArkanoidGame(canvas, context) {
                 console.log("collect drop:", drop);
                 // TODO play Sound
                 if (drop.kind === 'score'){
+                    playPickupSoundBonusScore()
                     this.score += SCORE_DROP_AMOUNT
                     this.scoreContainer.innerText = String(this.score);
                 } else if(drop.kind === 'biggerPaddle') {
+                    playPickupSoundPaddleExtension()
                     this.paddle.width = Math.min(this.paddle.width + PADDLE_EXTENSION, Math.min(PADDLE_WIDTH*3, this.width/2.5))
                 } else if(drop.kind === 'life'){
+                    playPickupSoundExtraLife()
                     if (this.lifes < 5) {
                         this.lifesContainer.innerText = localStorage.lifes = ++this.lifes;
                     }

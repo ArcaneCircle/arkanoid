@@ -9,3 +9,15 @@ export const playExplosionSFX = ()=> {
         zzfx(...[1.02,,203,.05,.06,.52,2,4.16,.3,.4,,,,1.7,,.4,,.32,.14])
     }
 }
+
+export const playPickupSoundPaddleExtension = () => {
+    zzfx(...[1.17,,28,.03,.04,.08,,.52,9.3,1.3,,,,1,,,.01,.9,.07]);
+}
+
+export const playPickupSoundExtraLife = () => {
+    zzfx(...[1.04,,53,,.27,.47,2,1.9,,,,,.08,.1,,.2,,.64,.21,.09]);
+}
+
+export const playPickupSoundBonusScore = () => {
+    zzfx(...[,,1532,,.08,.15,,1.51,,,,,,,,,,.53,.02]);
+}
