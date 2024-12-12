@@ -1,27 +1,37 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <script src="webxdc.js"></script>
-    </head>
-    <body scroll="no">
-        <div id="game">
-            <canvas id="canvas">Sorry, but your system doesn't support this game, try updating your browser or webview.</canvas>
-            <div id="score" class="label"><img src="./images/trophy.svg"/> <span id="score-container"></span></div>
-            <div id="lifes" class="label"><img src="./images/heart.svg"/><span id="lifes-container"></span></div>
-            <div id="level-wrapper">
-                <div id="level" class="label"><img src="./images/level.svg"/> <span id="level-container"></span></div>
-            </div>
-            <div id="timer-wrapper">
-                <div id="timer" class="label"><img src="./images/heart.svg"/><span id="timer-container"></span>
-                </div>
-                <a id="restart" class="label" href="#">
-                    <img src="./images/restart.svg"/><span> Restart</span>
-                </a>
-            </div>
-            <div id="scoreboard"></div>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="webxdc.js"></script>
+  </head>
+  <body scroll="no">
+    <div id="game">
+      <canvas id="canvas"
+        >Sorry, but your system doesn't support this game, try updating your
+        browser or webview.</canvas
+      >
+      <div id="score" class="label">
+        <img src="./images/trophy.svg" /> <span id="score-container"></span>
+      </div>
+      <div id="lifes" class="label">
+        <img src="./images/heart.svg" /><span id="lifes-container"></span>
+      </div>
+      <div id="level-wrapper">
+        <div id="level" class="label">
+          <img src="./images/level.svg" /> <span id="level-container"></span>
         </div>
-        <script type="module" src="./js/main.js"></script>
-    </body>
+      </div>
+      <div id="timer-wrapper">
+        <div id="timer" class="label">
+          <img src="./images/heart.svg" /><span id="timer-container"></span>
+        </div>
+        <a id="restart" class="label" href="#">
+          <img src="./images/restart.svg" /><span> Restart</span>
+        </a>
+      </div>
+      <div id="scoreboard"></div>
+    </div>
+    <script type="module" src="./js/main.js"></script>
+  </body>
 </html>

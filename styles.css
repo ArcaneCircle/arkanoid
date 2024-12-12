@@ -1,162 +1,170 @@
 * {
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    -webkit-touch-callout: none;
-    cursor: none;
-    -webkit-tap-highlight-color: rgba(0,0,0,0);
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  cursor: none;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
-.dead, .dead * {
-    cursor: default;
+.dead,
+.dead * {
+  cursor: default;
 }
 
-html, body {
-    padding: 0;
-    margin: 0;
+html,
+body {
+  padding: 0;
+  margin: 0;
 }
 
 body {
-    padding: 5px;
-    color: #ffffdc;
-    background: #000000;
-    font-family: Arial;
-    overflow: hidden;
+  padding: 5px;
+  color: #ffffdc;
+  background: #000000;
+  font-family: Arial;
+  overflow: hidden;
 }
 
 #game {
-    display: inline-block;
-    position: relative;
+  display: inline-block;
+  position: relative;
 }
 
 #canvas {
-    border: solid 1px gray;
+  border: solid 1px gray;
 }
 
 .label {
-    position: absolute;
-    display: inline-block;
-    z-index: 10;
-    padding: 0.2em;
-    border-radius: 0.3em;
-    background: rgba(0,0,0,0.3);
+  position: absolute;
+  display: inline-block;
+  z-index: 10;
+  padding: 0.2em;
+  border-radius: 0.3em;
+  background: rgba(0, 0, 0, 0.3);
 }
 
 .label img {
-    width: 15px;
+  width: 15px;
 }
 
 #level-wrapper {
-    position: absolute;
-    text-align: center;
-    width: 30%;
-    top: 0.1em;
-    left: 35%;
+  position: absolute;
+  text-align: center;
+  width: 30%;
+  top: 0.1em;
+  left: 35%;
 }
 #level {
-    position: relative;
+  position: relative;
 }
 
 #score {
-    top: 0.1em;
-    left: 0.1em;
+  top: 0.1em;
+  left: 0.1em;
 }
 
 #lifes {
-    top: 0.1em;
-    right: 0.1em;
+  top: 0.1em;
+  right: 0.1em;
 }
 
 #timer-wrapper {
-    position: absolute;
-    text-align: center;
-    width: 90%;
-    bottom: 0.6em;
-    left: 5%;
-    visibility: hidden;
-    overflow: hidden;
-    max-height: 0;
-    opacity: 0;
-    transition: opacity .2s ease-in,max-height .4s ease-in
+  position: absolute;
+  text-align: center;
+  width: 90%;
+  bottom: 0.6em;
+  left: 5%;
+  visibility: hidden;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition:
+    opacity 0.2s ease-in,
+    max-height 0.4s ease-in;
 }
 #timer {
-    position: relative;
+  position: relative;
 }
 #timer img {
-    animation: blink normal 2s infinite ease-in-out;
+  animation: blink normal 2s infinite ease-in-out;
 }
 
 #restart {
-    position: relative;
-    border: solid 1px #ffffdc;
-    text-decoration: none;
-    color: #ffffdc;
+  position: relative;
+  border: solid 1px #ffffdc;
+  text-decoration: none;
+  color: #ffffdc;
 }
-#restart, #restart * {
-    cursor: pointer;
+#restart,
+#restart * {
+  cursor: pointer;
 }
 
 #scoreboard {
-    position: absolute;
-    top: 15%;
-    left: 5%;
-    width: 90%;
-    font-weight: bold;
-    background: rgba(0,0,0,0.3);
-    border-radius: 0.3em;
-    visibility: hidden;
-    overflow: auto;
-    max-height: 0;
-    opacity: 0;
-    transition: opacity .2s ease-in,max-height .4s ease-in
+  position: absolute;
+  top: 15%;
+  left: 5%;
+  width: 90%;
+  font-weight: bold;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 0.3em;
+  visibility: hidden;
+  overflow: auto;
+  max-height: 0;
+  opacity: 0;
+  transition:
+    opacity 0.2s ease-in,
+    max-height 0.4s ease-in;
 }
 
-#scoreboard.opened, .dead #timer-wrapper {
-    opacity: 1;
-    visibility: visible;
-    max-height: 70%;
+#scoreboard.opened,
+.dead #timer-wrapper {
+  opacity: 1;
+  visibility: visible;
+  max-height: 70%;
 }
 
 @keyframes blink {
-    0% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.3;
-    }
-    100% {
-        opacity: 1;
-    }
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 /* webxdc-scores.js styles */
 
 .score-row {
-    text-align: left;
-    padding: 5px 10px;
-    margin: 1% 6%;
-    border-radius: 0.3em;
+  text-align: left;
+  padding: 5px 10px;
+  margin: 1% 6%;
+  border-radius: 0.3em;
 }
 
 .score-row.you {
-    color: #222;
-    background: #ffffdc;
+  color: #222;
+  background: #ffffdc;
 }
 
 .row-pos {
-    float: left;
-    color: #595959;
+  float: left;
+  color: #595959;
 }
 
 .row-score {
-    float: right;
-    display: inline-block;
+  float: right;
+  display: inline-block;
 }
 
 .row-name {
-    text-overflow: ellipsis;
-    display: inline-block;
-    width: 65%;
-    overflow: hidden;
-    white-space: nowrap;
+  text-overflow: ellipsis;
+  display: inline-block;
+  width: 65%;
+  overflow: hidden;
+  white-space: nowrap;
 }
