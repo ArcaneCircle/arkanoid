@@ -1,8 +1,15 @@
 import "../styles.css"
 
-import "webxdc-scores"
+import "@webxdc/highscores";
 import "./levels.js"
 import {Howl} from 'howler';
+
+import bricksURL from "/images/bricks.png"
+import paddleURL from "/images/paddle.png"
+import ballURL from "/images/ball.png"
+import bounceURL from "/sounds/bounce.mp3"
+import victoryURL from "/sounds/victory.mp3"
+import hitURL from "/sounds/hit.mp3"
 
 let arkanoidGame,
     imgBall,
@@ -543,14 +550,14 @@ function ArkanoidGame(canvas, context) {
 //-----------------------------------------------------------------------------------
 
 function loadAssets() {
-    imgBricks = new Image(); imgBricks.src = "./images/bricks.png";
-    imgPaddle = new Image(); imgPaddle.src = "./images/paddle.png";
-    imgBall = new Image(); imgBall.src = "./images/ball.png";
+    imgBricks = new Image(); imgBricks.src = bricksURL;
+    imgPaddle = new Image(); imgPaddle.src = paddleURL;
+    imgBall = new Image(); imgBall.src = ballURL;
 
     //load audio
-    sfxBounce = new Howl({src: ["sounds/bounce.mp3"]});
-    sfxWin = new Howl({src: ["sounds/victory.mp3"]});
-    sfxHit = new Howl({src: ["sounds/hit.mp3"]});
+    sfxBounce = new Howl({src: [bounceURL]});
+    sfxWin = new Howl({src: [victoryURL]});
+    sfxHit = new Howl({src: [hitURL]});
 }
 
 function getRandomInt(min, max) {
@@ -587,7 +594,12 @@ function onclick() {
 loadAssets();
 
 window.addEventListener("load", () => {
-    window.highscores.init("Arkanoid", "scoreboard").then(() => {
+  const scoreboard = document.getElementById("scoreboard");
+  window.highscores.init({
+  onHighscoresChanged: () => {
+    scoreboard.innerHTML = window.highscores.renderScoreboard().innerHTML;
+  },
+  }).then(() => {
         setup();
 
         document.onmousemove = (event) => {

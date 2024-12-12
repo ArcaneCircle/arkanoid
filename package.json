@@ -1,20 +1,19 @@
 {
   "private": true,
-  "packageManager": "pnpm@6.32.3",
+  "type": "module",
   "scripts": {
-    "dev": "concurrently \"vite --host\" \"webxdc-dev run http://localhost:3000\"",
-    "dev-xdc": "pnpm build && webxdc-dev run dist/app.xdc",
-    "build": "vite build && jszip-cli -c jszip.config.json"
+    "start": "vite --port 3000",
+    "fix": "prettier --write .",
+    "check": "prettier --check .",
+    "build": "vite build"
   },
   "devDependencies": {
-    "@ffflorian/jszip-cli": "^3.1.6",
-    "concurrently": "^7.2.2",
-    "eruda": "^2.4.1",
-    "vite": "^2.9.9",
-    "webxdc-dev": "^0.8.0"
+    "@webxdc/vite-plugins": "latest",
+    "prettier": "latest",
+    "vite": "latest"
   },
   "dependencies": {
-    "howler": "^2.2.3",
-    "webxdc-scores": "github:webxdc/webxdc-scores"
+    "@webxdc/highscores": "^5.2.0",
+    "howler": "^2.2.3"
   }
 }
